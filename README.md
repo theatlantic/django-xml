@@ -4,6 +4,31 @@
 [lxml](http://lxml.de/)'s XPath and XSLT functionality in a manner resembling
 django database models.
 
+## Contents
+
+ * [Installation](#installation)
+ * [Example](#example)
+ * [Advanced Example](#advanced-example)
+ * [XmlModel Meta options](#xmlmodel-meta-options)
+   * [namespaces](#namespacesoptionsnamespaces--)
+   * [parser_opts](#parser_optsoptionsparser_opts--)
+   * [extension_ns_uri](#extension_ns_urioptionsextension_ns_uri)
+ * [@lxml_extension reference](#lxml_extension-reference)
+   * [ns_uri](#ns_uri)
+   * [name](#name)
+ * [XPathField options](#xpathfield-options)
+   * [xpath_query](#xpath_queryxpathfieldxpath_query)
+   * [required](#requiredxpathfieldrequired)
+   * [extra_namespaces](#extra_namespacesxpathfieldextra_namespaces)
+   * [extensions](#extensionsxpathfieldextensions)
+ * [XPathSingleNodeField options](#xpathsinglenodefield-options)
+   * [ignore_extra_nodes](#ignore_extra_nodesxpathsinglenodefieldignore_extra_nodes--false)
+ * [XsltField options](#xsltfield-options)
+   * [xslt_file, xslt_string](#xslt_file-xslt_stringxsltfieldxslt_filexsltfieldxslt_string)
+   * [parser](#parserxsltfieldparser)
+   * [extensions](#extensionsxsltfieldextensions--)
+ * [XmlModel field reference](#xmlmodel-field-reference)
+
 ## Installation
 
 Because this is a project under active development, the recommended
@@ -74,6 +99,10 @@ if __name__ == '__main__':
     main()
 ```
 
+## Advanced Example
+
+An example of django-xml usage which includes XsltField and @lxml_extension methods
+can be found [here](https://github.com/theatlantic/django-xml/blob/master/docs/advanced_example.md).
 
 ## XmlModel Meta options
 
@@ -144,8 +173,8 @@ A dict of extra prefix/uri namespace pairs to pass to
 
 #### extensions<br>`XPathField.extensions`
 
-Extra extensions to pass on to 
-[`lxml.etree.XPathEvaluator()`](http://lxml.de/api/lxml.etree-module.html#XPathEvaluator).
+Extra extensions to pass on to the constructor of
+[`lxml.etree.XSLT`](http://lxml.de/api/lxml.etree.XSLT-class.html#__init__).
 See the [lxml documentation](http://lxml.de/extensions.html#evaluator-local-extensions)
 for details on how to form the <b>`extensions`</b> keyword argument.
 
@@ -160,7 +189,39 @@ Defaults to `False`.
 
 To return the full list of nodes, Use an <b>`XPathListField`</b>
 
+## XsltField options
+
+#### xslt_file, xslt_string<br>`XsltField.xslt_file`<br>`XsltField.xslt_string`
+
+The first positional argument to XsltField is the path to an xslt file.
+Alternatively, the xslt can be passed as a string using the
+<b>`xslt_string`</b> keyword argument. It is required to specify one of these
+fields.
+
+#### parser<br>`XsltField.parser`
+
+An instance of [lxml.etree.XMLParser](http://lxml.de/api/lxml.etree.XMLParser-class.html)
+to override the one created by the XmlModel class. To override parsing options
+for the entire class, use the [<b>`parser_opts`</b>](#parser_optsoptionsparser_opts--)
+attribute of the [XmlModel internal <b>`Meta`</b> class](#xmlmodel-meta-options).
+
+#### extensions<br>`XsltField.extensions = {}`
+
+Extra extensions to pass on to 
+[`lxml.etree.XPathEvaluator()`](http://lxml.de/api/lxml.etree-module.html#XPathEvaluator).
+See the [lxml documentation](http://lxml.de/extensions.html#evaluator-local-extensions)
+for details on how to form the <b>`extensions`</b> keyword argument.
+
 ## XmlModel field reference
+
+```python
+class XsltField(xslt_file=None, xslt_string=None, parser=None, extensions=None)
+```
+
+Field which abstracts the creation of
+[lxml.etree.XSLT](http://lxml.de/api/lxml.etree.XSLT-class.html) objects.
+This field's return type is a callable which accepts keyword arguments that
+are passed as parameters to the stylesheet.
 
 ```python
 class XPathField(xpath_query, required=False, extra_namespaces=None, extensions=None)
