@@ -106,7 +106,7 @@ can be found [here](https://github.com/theatlantic/django-xml/blob/master/docs/a
 
 ## XmlModel Meta options
 
-Metadata for an <b>`XmlModel`</b> are passed as attributes of an
+Metadata for an <b>`XmlModel`</b> is passed as attributes of an
 internal class named <b>`Meta`</b>. Listed below are the options
 that can be set on the <b>`Meta`</b> class.
 
