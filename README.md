@@ -173,8 +173,8 @@ A dict of extra prefix/uri namespace pairs to pass to
 
 #### extensions<br>`XPathField.extensions`
 
-Extra extensions to pass on to the constructor of
-[`lxml.etree.XSLT`](http://lxml.de/api/lxml.etree.XSLT-class.html#__init__).
+Extra extensions to pass on to 
+[`lxml.etree.XSLT`](http://lxml.de/api/lxml.etree-module.html#XPathEvaluator).
 See the [lxml documentation](http://lxml.de/extensions.html#evaluator-local-extensions)
 for details on how to form the <b>`extensions`</b> keyword argument.
 
@@ -207,8 +207,8 @@ attribute of the [XmlModel internal <b>`Meta`</b> class](#xmlmodel-meta-options)
 
 #### extensions<br>`XsltField.extensions = {}`
 
-Extra extensions to pass on to 
-[`lxml.etree.XPathEvaluator()`](http://lxml.de/api/lxml.etree-module.html#XPathEvaluator).
+Extra extensions to pass on to the constructor of
+[`lxml.etree.XSLT`](http://lxml.de/api/lxml.etree.XSLT-class.html#__init__).
 See the [lxml documentation](http://lxml.de/extensions.html#evaluator-local-extensions)
 for details on how to form the <b>`extensions`</b> keyword argument.
 
