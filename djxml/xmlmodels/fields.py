@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.utils.encoding import force_unicode
 
 from .descriptors import ImmutableFieldBase, XPathFieldBase, XsltFieldBase
+from .exceptions import XmlSchemaValidationError
 from .utils import parse_datetime
 
 
@@ -108,20 +109,38 @@ class XmlElementField(XmlField):
     def validate(self, value, model_instance):
         if value is None:
             if not self.value_initialized or not self.required:
-                return value
+                return
+
         if not isinstance(value, etree._Element):
+
+            if hasattr(value, 'getroot'):
+                try:
+                    value = value.getroot()
+                except:
+                    pass
+                else:
+                    if isinstance(value, etree._Element):
+                        return
+
             opts = model_instance._meta
             raise ValidationError(("Field %(field_name)r on xml model "
-                                   "%(module_name)s.%(object_name)s is not an"
+                                   "%(app_label)s.%(object_name)s is not an"
                                    " instance of lxml.etree._Element") % {
                                         "field_name":  self.name,
-                                        "module_name": opts.module_name,
-                                        "object_name":   opts.object_name,})
+                                        "app_label":   opts.app_label,
+                                        "object_name": opts.object_name,})
 
 
 class XmlPrimaryElementField(XmlElementField):
 
     is_primary_etree = True
+
+    def validate(self, value, model_instance):
+        if model_instance._meta.xsd_schema is not None:
+            try:
+                model_instance._meta.xsd_schema.assertValid(value)
+            except Exception, e:
+                raise XmlSchemaValidationError(unicode(e))
 
     def contribute_to_class(self, cls, name):
         assert not cls._meta.has_primary_etree_field, \

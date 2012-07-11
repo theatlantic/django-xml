@@ -1,6 +1,10 @@
+from django.core.exceptions import ValidationError
+
 class XmlModelException(Exception):
     pass
 
+class XmlSchemaValidationError(ValidationError):
+    pass
 
 class XPathException(XmlModelException):
     pass
