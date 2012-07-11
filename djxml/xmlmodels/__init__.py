@@ -5,4 +5,6 @@ from .fields import (XmlElementField, XmlPrimaryElementField,
                      XPathSingleNodeField, XPathTextField, XPathIntegerField,
                      XPathFloatField, XPathDateTimeField, XPathListField,
                      XPathTextListField, XPathIntegerListField,
-                     XPathFloatListField, XPathDateTimeListField, XsltField,)
+                     XPathFloatListField, XPathDateTimeListField, XsltField,
+                     XPathHtmlField, XPathHtmlListField,
+                     XPathInnerHtmlField, XPathInnerHtmlListField,)

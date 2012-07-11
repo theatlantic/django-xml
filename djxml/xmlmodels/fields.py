@@ -1,3 +1,5 @@
+import re
+
 from lxml import etree
 
 import django.utils.copycompat as copy
@@ -339,6 +341,90 @@ class XPathDateTimeListField(XPathTextListField):
             return value
         else:
             return [parse_datetime(v) for v in value]
+
+
+class XPathHtmlField(XPathSingleNodeField):
+    """
+    Differs from XPathTextField in that it serializes mixed content to a
+    unicode string, rather than simply returning the first text node.
+    """
+    #: Whether to strip the 'xmlns="http://www.w3.org/1999/xhtml"' from
+    #: the serialized html strings
+    strip_xhtml_ns = True
+
+    def __init__(self, xpath_query, strip_xhtml_ns=True, **kwargs):
+        self.strip_xhtml_ns = strip_xhtml_ns
+        super(XPathHtmlField, self).__init__(xpath_query, **kwargs)
+
+    def format_value(self, value):
+        formatted = etree.tounicode(value)
+        if self.strip_xhtml_ns:
+            formatted = formatted.replace(u' xmlns="http://www.w3.org/1999/xhtml"', '')
+        return formatted
+
+    def to_python(self, value):
+        value = super(XPathHtmlField, self).to_python(value)
+        if value is None:
+            return value
+        if isinstance(value, etree._Element):
+            return self.format_value(value)
+
+
+class XPathHtmlListField(XPathListField):
+    """
+    Differs from XPathHtmlListField in that it serializes mixed content to
+    a unicode string, rather than simply returning the first text node for
+    each node in the result.
+    """
+    #: Whether to strip the 'xmlns="http://www.w3.org/1999/xhtml"' from
+    #: the serialized html strings
+    strip_xhtml_ns = True
+
+    def __init__(self, xpath_query, strip_xhtml_ns=True, **kwargs):
+        self.strip_xhtml_ns = strip_xhtml_ns
+        super(XPathHtmlListField, self).__init__(xpath_query, **kwargs)
+
+    def format_value(self, value):
+        formatted = etree.tounicode(value)
+        if self.strip_xhtml_ns:
+            formatted = formatted.replace(u' xmlns="http://www.w3.org/1999/xhtml"', '')
+        return formatted
+
+    def to_python(self, value):
+        value = super(XPathHtmlListField, self).to_python(value)
+        if value is None:
+            return value
+        else:
+            return [self.format_value(v) for v in value]
+
+
+class XPathInnerHtmlMixin(object):
+
+    def get_inner_html(self, value):
+        if not isinstance(value, basestring):
+            return value
+        # Strip surrounding tag
+        value = re.sub(r"^(?s)<([^>\s]*)(?:[^>]*>|>)(.*)</\1>$", r'\2', value)
+        # Remove leading and trailing whitespace
+        value = value.strip()
+        return value
+
+class XPathInnerHtmlField(XPathInnerHtmlMixin, XPathHtmlField):
+
+    def to_python(self, value):
+        if value is None:
+            return value
+        value = super(XPathInnerHtmlField, self).to_python(value)
+        return self.get_inner_html(value)
+
+
+class XPathInnerHtmlListField(XPathInnerHtmlMixin, XPathHtmlListField):
+
+    def to_python(self, value):
+        if value is None:
+            return value
+        value = super(XPathInnerHtmlListField, self).to_python(value)
+        return [self.get_inner_html(v) for v in value]
 
 
 class XsltField(XmlField):
