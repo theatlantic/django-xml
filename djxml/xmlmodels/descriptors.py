@@ -27,15 +27,15 @@ class ImmutableCreator(Creator):
         self.field.value_initialized = False
 
     def __set__(self, model_instance, value):
-        if '_field_inits' not in model_instance.__dict__:
-            model_instance._field_inits = {}
-        if model_instance._field_inits.get(self.field.name, False):
+        if '_field_inits' not in model_instance._meta.__dict__:
+            model_instance._meta._field_inits = {}
+        if model_instance._meta._field_inits.get(self.field.name, False):
             raise TypeError("%s.%s is immutable" \
                 % (model_instance.__class__.__name__, self.field.name))
 
         super(ImmutableCreator, self).__set__(model_instance, value)
 
-        model_instance._field_inits[self.field.name] = True
+        model_instance._meta._field_inits[self.field.name] = True
         self.field.value_initialized = True
 
 
