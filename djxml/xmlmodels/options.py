@@ -19,8 +19,8 @@ class Options(object):
         self.object_name, self.app_label = None, app_label
         self.meta = meta
 
-        self.etree = None
-        self.has_primary_etree_field, self.etree_field = False, None
+        self.root = None
+        self.has_root_field, self.root_field = False, None
 
         # Dict mapping ns prefixes to ns URIs
         self.namespaces = {}
@@ -78,9 +78,9 @@ class Options(object):
         del self.meta
 
     def _prepare(self, model):
-        if self.etree is None:
-            etree_field = XmlPrimaryElementField()
-            model.add_to_class('primary_element', etree_field)
+        if self.root is None:
+            root_field = XmlPrimaryElementField()
+            model.add_to_class('root', root_field)
         if self.xsd_schema_file is not None:
             schema_root = etree.parse(self.xsd_schema_file)
             self.xsd_schema = etree.XMLSchema(schema_root)
@@ -94,7 +94,7 @@ class Options(object):
         # Insert the given field in the order in which it was created, using
         # the "creation_counter" attribute of the field.
         self.local_fields.insert(bisect(self.local_fields, field), field)
-        self.setup_etree(field)
+        self.setup_root(field)
         if hasattr(self, '_field_cache'):
             del self._field_cache
             del self._field_name_cache
@@ -118,8 +118,8 @@ class Options(object):
         
         self.extensions[(ns_uri, extension_name,)] = method
 
-    def setup_etree(self, field):
-        if not self.etree and field.is_primary_etree:
+    def setup_root(self, field):
+        if not self.root and field.is_root_field:
             self.etree = field
 
     def __repr__(self):

@@ -22,7 +22,7 @@ class XmlField(object):
     creation_counter = 0
 
     #: If true, the field is the primary xml element
-    is_primary_etree = False
+    is_root_field = False
 
     #: an instance of lxml.etree.XMLParser, to override the default
     parser = None
@@ -135,7 +135,7 @@ class XmlElementField(XmlField):
 
 class XmlPrimaryElementField(XmlElementField):
 
-    is_primary_etree = True
+    is_root_field = True
 
     def validate(self, value, model_instance):
         if model_instance._meta.xsd_schema is not None:
@@ -145,11 +145,11 @@ class XmlPrimaryElementField(XmlElementField):
                 raise XmlSchemaValidationError(unicode(e))
 
     def contribute_to_class(self, cls, name):
-        assert not cls._meta.has_primary_etree_field, \
+        assert not cls._meta.has_root_field, \
             "An xml model can't have more than one XmlPrimaryElementField"
         super(XmlPrimaryElementField, self).contribute_to_class(cls, name)
-        cls._meta.has_primary_etree_field = True
-        cls._meta.etree_field = self
+        cls._meta.has_root_field = True
+        cls._meta.root_field = self
 
 
 class XPathField(XmlField):

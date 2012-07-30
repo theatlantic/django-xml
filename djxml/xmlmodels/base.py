@@ -95,12 +95,12 @@ class XmlModel(object):
 
     __metaclass__ = XmlModelBase
 
-    def __init__(self, element_tree):
+    def __init__(self, root_element_tree):
         fields_iter = iter(self._meta.fields)
 
         for field in fields_iter:
-            if getattr(field, 'is_primary_etree', True):
-                val = element_tree
+            if getattr(field, 'is_root_field', True):
+                val = root_element_tree
             else:
                 val = field.get_default()
             setattr(self, field.attname, val)
