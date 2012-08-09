@@ -211,6 +211,16 @@ class XPathField(XmlField):
         else:
             return [value]
 
+    def __unicode__(self):
+        return (u"%(field_name)s[%(xpath_query)r]" % {
+            "field_name": self.name,
+            "xpath_query": self.xpath_query,})
+
+    def __repr__(self):
+        return ("<%(cls)s: %(field)s>" % {
+            "cls": self.__class__.__name__,
+            "field": self.__unicode__().encode('raw_unicode_escape'),})
+
 
 class XPathListField(XPathField):
     """
