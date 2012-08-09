@@ -204,6 +204,13 @@ class XPathField(XmlField):
         value = self.to_python(value)
         return value
 
+    def get_default(self):
+        value = super(XPathField, self).get_default()
+        if value is None:
+            return value
+        else:
+            return [value]
+
 
 class XPathListField(XPathField):
     """

@@ -11,13 +11,13 @@ class Creator(object):
         self.field = field
 
     def __get__(self, model_instance, type=None):
-        if model_instance is None:
-            raise AttributeError('Can only be accessed via an instance.')
         return model_instance.__dict__[self.field.name]
 
     def __set__(self, model_instance, value):
         cleaned_value = self.field.clean(value, model_instance)
         model_instance.__dict__[self.field.name] = cleaned_value
+        if value is not None:
+            model_instance.__dict__[self.cache_name] = cleaned_value
 
 
 class ImmutableCreator(Creator):
@@ -25,18 +25,20 @@ class ImmutableCreator(Creator):
     def __init__(self, field):
         super(ImmutableCreator, self).__init__(field)
         self.field.value_initialized = False
+        self.cache_name = field.get_cache_name()
 
     def __set__(self, model_instance, value):
-        if '_field_inits' not in model_instance._meta.__dict__:
-            model_instance._meta._field_inits = {}
-        if model_instance._meta._field_inits.get(self.field.name, False):
+        if '_field_inits' not in model_instance.__dict__:
+            model_instance._field_inits = {}
+        if model_instance._field_inits.get(self.field.name, False):
             raise TypeError("%s.%s is immutable" \
                 % (model_instance.__class__.__name__, self.field.name))
 
         super(ImmutableCreator, self).__set__(model_instance, value)
 
-        model_instance._meta._field_inits[self.field.name] = True
-        self.field.value_initialized = True
+        if model_instance.__dict__[self.field.name] is not None:
+            model_instance._field_inits[self.field.name] = True
+            self.field.value_initialized = True
 
 
 class FieldBase(type):
@@ -64,7 +66,6 @@ class ImmutableFieldBase(FieldBase):
 class XPathObjectDescriptor(ImmutableCreator):
 
     def __init__(self, field):
-        self.cache_name = field.get_cache_name()
         super(XPathObjectDescriptor, self).__init__(field)
 
     def __get__(self, instance, instance_type=None):
