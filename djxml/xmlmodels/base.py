@@ -4,12 +4,13 @@ import codecs
 
 from lxml import etree
 
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.core.exceptions import (ObjectDoesNotExist, FieldError,
+                                    MultipleObjectsReturned,)
 from django.db.models.base import subclass_exception
 from django.utils.encoding import smart_str, force_unicode
+import django.utils.copycompat as copy
 
-from .options import Options
-
+from .options import Options, DEFAULT_NAMES
 from .loading import register_xml_models, get_xml_model
 
 
@@ -42,15 +43,27 @@ class XmlModelBase(type):
         else:
             kwargs = {}
 
+        for attr_name in DEFAULT_NAMES:
+            if attr_name == 'app_label':
+                continue
+            if getattr(meta, attr_name, None) is None:
+                for base in parents:
+                    if not hasattr(base, '_meta'):
+                        continue
+                    attr_val = getattr(base._meta, attr_name)
+                    if attr_val is not None:
+                        kwargs[attr_name] = attr_val
+                        break
+
         new_class.add_to_class('_meta', Options(meta, **kwargs))
 
         new_class.add_to_class('DoesNotExist', subclass_exception('DoesNotExist',
                 tuple(x.DoesNotExist
-                        for x in parents if hasattr(x, '_meta') and not x._meta.abstract)
+                        for x in parents if hasattr(x, '_meta'))
                                 or (ObjectDoesNotExist,), module))
         new_class.add_to_class('MultipleObjectsReturned', subclass_exception('MultipleObjectsReturned',
                 tuple(x.MultipleObjectsReturned
-                        for x in parents if hasattr(x, '_meta') and not x._meta.abstract)
+                        for x in parents if hasattr(x, '_meta'))
                                 or (MultipleObjectsReturned,), module))
 
         # Bail out early if we have already created this class.
@@ -61,6 +74,24 @@ class XmlModelBase(type):
         # Add all attributes to the class.
         for obj_name, obj in attrs.items():
             new_class.add_to_class(obj_name, obj)
+
+        field_names = set([f.name for f in new_class._meta.local_fields])
+
+        for base in parents:
+            if not hasattr(base, '_meta'):
+                # Things without _meta aren't functional models, so they're
+                # uninteresting parents
+                continue
+
+            for field in base._meta.local_fields:
+                if field.name in field_names:
+                    raise FieldError('Local field %r in class %r clashes '
+                                     'with field of similar name from '
+                                     'base class %r' %
+                                        (field.name, name, base.__name__))
+                new_class.add_to_class(field.name, copy.deepcopy(field))
+
+            new_class._meta.parents.update(base._meta.parents)
 
         new_class._prepare()
         register_xml_models(new_class._meta.app_label, new_class)
