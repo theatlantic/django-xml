@@ -340,6 +340,47 @@ class XPathDateTimeField(XPathTextField):
             return parse_datetime(value)
 
 
+class XPathBooleanField(XPathTextField):
+
+    true_vals = ('true',)
+    false_vals = ('false',)
+
+    def __init__(self, *args, **kwargs):
+        true_vals = kwargs.pop('true_vals', None)
+        if true_vals is not None:
+            self.true_vals = true_vals
+        false_vals = kwargs.pop('false_vals', None)
+        if false_vals is not None:
+            self.false_vals = false_vals
+        super(XPathBooleanField, self).__init__(*args, **kwargs)
+
+    def validate(self, value, model_instance):
+        super(XPathBooleanField, self).validate(value, model_instance)
+        if value is None:
+            return
+        value = XPathTextField.to_python(self, value)
+        if value not in self.true_vals and value not in self.false_vals:
+            opts = model_instance._meta
+            exc_msg = (u"%(field)s on xmlmodel %(app_label)s.%(object_name)s "
+                       u"has value %(val)r not in true_vals or false_vals" % {
+                            "field": repr(self).decode('raw_unicode_escape'),
+                            "app_label": opts.app_label,
+                            "object_name": opts.object_name,
+                            "val": value,})
+            raise ValidationError(exc_msg)
+
+    def to_python(self, value):
+        if value is None:
+            return value
+        value = super(XPathBooleanField, self).to_python(value)
+        if value in self.true_vals:
+            return True
+        elif value in self.false_vals:
+            return False
+        else:
+            return value
+
+
 class XPathTextListField(XPathListField):
 
     def to_python(self, value):
@@ -378,6 +419,49 @@ class XPathDateTimeListField(XPathTextListField):
             return value
         else:
             return [parse_datetime(v) for v in value]
+
+
+class XPathBooleanListField(XPathTextListField):
+
+    true_vals = ('true',)
+    false_vals = ('false',)
+
+    def __init__(self, *args, **kwargs):
+        true_vals = kwargs.pop('true_vals', None)
+        if true_vals is not None:
+            self.true_vals = true_vals
+        false_vals = kwargs.pop('false_vals', None)
+        if false_vals is not None:
+            self.false_vals = false_vals
+        super(XPathBooleanField, self).__init__(*args, **kwargs)
+
+    def validate(self, value, model_instance):
+        super(XPathBooleanField, self).validate(value, model_instance)
+        values = super(XPathBooleanListField, self).to_python(value)
+        if values is None:
+            return
+        for value in values:
+            if value not in self.true_vals and value not in self.false_vals:
+                opts = model_instance._meta
+                raise ValidationError(("XPathBooleanListField %(field)r on "
+                                       " xml model %(app_label)s.%(object_name)s"
+                                       " has value %(value)r not in 'true_vals'"
+                                       " or 'false_vals'") % {
+                                            "field":       self.name,
+                                            "app_label":   opts.app_label,
+                                            "object_name": opts.object_name,
+                                            "value":       value,})
+
+    def to_python(self, value):
+        value = super(XPathBooleanField, self).to_python(value)
+        if value is None:
+            return value
+        elif value in self.true_vals:
+            return True
+        elif value in self.false_vals:
+            return False
+        else:
+            return value
 
 
 class XPathHtmlField(XPathSingleNodeField):

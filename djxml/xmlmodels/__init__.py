@@ -7,4 +7,5 @@ from .fields import (XmlElementField, XmlPrimaryElementField,
                      XPathTextListField, XPathIntegerListField,
                      XPathFloatListField, XPathDateTimeListField, XsltField,
                      XPathHtmlField, XPathHtmlListField,
-                     XPathInnerHtmlField, XPathInnerHtmlListField,)
+                     XPathInnerHtmlField, XPathInnerHtmlListField,
+                     XPathBooleanField, XPathBooleanListField,)
