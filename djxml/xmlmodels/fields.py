@@ -280,6 +280,26 @@ class XPathSingleNodeField(XPathField):
 
 class XPathTextField(XPathSingleNodeField):
 
+    #: A tuple of strings which should be interpreted as None.
+    none_vals = ()
+
+    def __init__(self, *args, **kwargs):
+        none_vals = kwargs.pop('none_vals', None)
+        if none_vals is not None:
+            self.none_vals = [force_unicode(v) for v in none_vals]
+        super(XPathTextField, self).__init__(*args, **kwargs)
+
+    def validate(self, value, model_instance):
+        super(XPathTextField, self).validate(value, model_instance)
+        if len(self.none_vals):
+            value = self.to_python(value)
+            if self.required and value in self.none_vals:
+                error_msg = (u"%(field)s is required, but value %(value)r is "
+                             u"mapped to None") % {
+                                "field": unicode(self),
+                                "value": value,}
+                raise model_instance.DoesNotExist(error_msg)
+
     def to_python(self, value):
         value = super(XPathTextField, self).to_python(value)
         if value is None:
