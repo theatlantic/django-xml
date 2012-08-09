@@ -591,3 +591,8 @@ class XsltField(XmlField):
             elif self.xslt_string is not None:
                 self._xslt_tree = etree.XML(self.xslt_string, parser)
         return self._xslt_tree
+
+
+# Extra imports so that these can be used via xmlmodels.fields
+from .related import (EmbeddedXPathField, EmbeddedXPathListField,
+                      EmbeddedXsltField,)

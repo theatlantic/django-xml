@@ -11,3 +11,5 @@ from .fields import (XmlElementField, XmlPrimaryElementField,
                      XPathHtmlField, XPathHtmlListField,
                      XPathInnerHtmlField, XPathInnerHtmlListField,
                      XPathBooleanField, XPathBooleanListField,)
+from .related import (EmbeddedXPathField, EmbeddedXPathListField,
+                      EmbeddedXsltField,)
