@@ -355,6 +355,8 @@ class XPathBooleanField(XPathTextField):
         super(XPathBooleanField, self).__init__(*args, **kwargs)
 
     def validate(self, value, model_instance):
+        if value is True or value is False:
+            return
         super(XPathBooleanField, self).validate(value, model_instance)
         if value is None:
             return
@@ -370,7 +372,7 @@ class XPathBooleanField(XPathTextField):
             raise ValidationError(exc_msg)
 
     def to_python(self, value):
-        if value is None:
+        if value is None or value is True or value is False:
             return value
         value = super(XPathBooleanField, self).to_python(value)
         if value in self.true_vals:
@@ -529,6 +531,7 @@ class XPathInnerHtmlMixin(object):
         # Remove leading and trailing whitespace
         value = value.strip()
         return value
+
 
 class XPathInnerHtmlField(XPathInnerHtmlMixin, XPathHtmlField):
 
