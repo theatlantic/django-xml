@@ -144,9 +144,10 @@ class XmlModel(object):
         return getattr(self, meta.etree.attname)
 
     @classmethod
-    def create_from_string(cls, xml_source):
+    def create_from_string(cls, xml_source, parser=None):
         opts = cls._meta
-        parser = opts.get_parser()
+        if parser is None:
+            parser = opts.get_parser()
         # lxml doesn't like it when the <?xml ?> header has an encoding,
         # so we strip out encoding="utf-8" with a regex
         xml_source = re.sub(r'(<\?xml[^\?]*?) encoding="(?:utf-8|UTF-8)"([^\?]*?\?>)',

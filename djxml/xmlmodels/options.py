@@ -41,7 +41,7 @@ class Options(object):
         self.xsd_schema_file = xsd_schema_file
 
         # Dict passed as kwargs to create lxml.etree.XMLParser instance
-        self.parser_opts = parser_opts
+        self.parser_opts = parser_opts or {}
         self.parser = None
         self.parents = SortedDict()
 
