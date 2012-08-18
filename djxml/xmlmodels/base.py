@@ -130,10 +130,10 @@ class XmlModel(object):
         fields_iter = iter(self._meta.fields)
 
         for field in fields_iter:
-            if getattr(field, 'is_root_field', True):
+            if getattr(field, 'is_root_field', False):
                 val = root_element_tree
             else:
-                val = field.get_default()
+                val = None
             setattr(self, field.attname, val)
 
         super(XmlModel, self).__init__()

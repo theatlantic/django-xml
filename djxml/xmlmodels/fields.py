@@ -361,6 +361,8 @@ class XPathBooleanField(XPathTextField):
         if value is None:
             return
         value = XPathTextField.to_python(self, value)
+        if value is None:
+            return
         if value not in self.true_vals and value not in self.false_vals:
             opts = model_instance._meta
             exc_msg = (u"%(field)s on xmlmodel %(app_label)s.%(object_name)s "
