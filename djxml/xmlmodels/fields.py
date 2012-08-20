@@ -482,7 +482,7 @@ class XPathHtmlField(XPathSingleNodeField):
         super(XPathHtmlField, self).__init__(xpath_query, **kwargs)
 
     def format_value(self, value):
-        formatted = etree.tounicode(value)
+        formatted = etree.tostring(value, encoding='unicode', method='html')
         if self.strip_xhtml_ns:
             formatted = formatted.replace(u' xmlns="http://www.w3.org/1999/xhtml"', '')
         return formatted
@@ -510,7 +510,7 @@ class XPathHtmlListField(XPathListField):
         super(XPathHtmlListField, self).__init__(xpath_query, **kwargs)
 
     def format_value(self, value):
-        formatted = etree.tounicode(value)
+        formatted = etree.tostring(value, encoding='unicode', method='html')
         if self.strip_xhtml_ns:
             formatted = formatted.replace(u' xmlns="http://www.w3.org/1999/xhtml"', '')
         return formatted
@@ -525,11 +525,18 @@ class XPathHtmlListField(XPathListField):
 
 class XPathInnerHtmlMixin(object):
 
+    self_closing_re = re.compile(
+        ur'<(area|base(?:font)?|frame|col|br|hr|input|img|link|meta|param)'
+        ur'([^/>]*?)></\1>')
+
     def get_inner_html(self, value):
         if not isinstance(value, basestring):
             return value
         # Strip surrounding tag
         value = re.sub(r"^(?s)<([^>\s]*)(?:[^>]*>|>)(.*)</\1>$", r'\2', value)
+        # Replace open-close tags into self-closing where appropriate
+        # e.g. "<br></br>" => "<br/>"
+        value = self.self_closing_re.sub(ur'<\1\2/>', value)
         # Remove leading and trailing whitespace
         value = value.strip()
         return value

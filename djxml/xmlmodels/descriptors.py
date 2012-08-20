@@ -121,7 +121,13 @@ class XsltObjectDescriptor(ImmutableCreator):
             extensions.update(self.field.extensions)
 
             transform = etree.XSLT(xslt_tree, extensions=extensions)
-            return functools.partial(transform, tree)
+            def xslt_wrapper(xslt_func):
+                def wrapper(*args, **kwargs):
+                    xslt_result = xslt_func(*args, **kwargs)
+                    return self.field.clean(xslt_result, instance)
+                return wrapper
+            xslt_func = functools.partial(transform, tree)
+            return xslt_wrapper(xslt_func)
 
 
 class XsltFieldBase(FieldBase):
