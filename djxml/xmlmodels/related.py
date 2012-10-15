@@ -124,7 +124,7 @@ class EmbeddedXPathListField(XPathListField, EmbeddedField):
         if value is None:
             return value
         else:
-            return self.embedded_model(value)
+            return [self.embedded_model(v) for v in value]
 
     def contribute_to_class(self, cls, name):
         EmbeddedField.contribute_to_class(self, cls, name)
