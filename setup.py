@@ -9,7 +9,7 @@ except ImportError:
 
 setup(
     name='django-xml',
-    version="1.2",
+    version="1.2.1",
     install_requires=[
         'lxml',
         'pytz',
