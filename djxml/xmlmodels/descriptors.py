@@ -1,6 +1,7 @@
 import functools
-
 from lxml import etree
+
+from . import exceptions
 
 
 class Creator(object):
@@ -123,11 +124,15 @@ class XsltObjectDescriptor(ImmutableCreator):
             transform = etree.XSLT(xslt_tree, extensions=extensions)
             def xslt_wrapper(xslt_func):
                 def wrapper(*args, **kwargs):
-                    xslt_result = xslt_func(*args, **kwargs)
+                    try:
+                        xslt_result = xslt_func(tree, *args, **kwargs)
+                    except etree.XSLTApplyError, e:
+                        # Put this in frame locals for debugging
+                        xslt_source = etree.tostring(xslt_tree, encoding='utf8')
+                        raise exceptions.XsltException(e, xslt_func)
                     return self.field.clean(xslt_result, instance)
                 return wrapper
-            xslt_func = functools.partial(transform, tree)
-            return xslt_wrapper(xslt_func)
+            return xslt_wrapper(transform)
 
 
 class XsltFieldBase(FieldBase):
