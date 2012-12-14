@@ -1,6 +1,7 @@
 import re
 import sys
 import codecs
+import functools
 
 from lxml import etree
 
@@ -145,6 +146,53 @@ class XmlModel(object):
         if not meta:
             meta = self._meta
         return getattr(self, meta.etree.attname)
+
+    _default_xpath_eval = None
+
+    @property
+    def default_xpath_eval(self):
+        if self._default_xpath_eval is None:
+            self._default_xpath_eval = self._get_xpath_eval()
+        return self._default_xpath_eval
+
+    def _merge_xpath_kwargs(self, ns=None, ext=None):
+        """
+        Merge user-provided namespace and extension keywords with the model
+        defaults.
+        """
+        opts = self._meta
+
+        xpath_kwargs = {
+            'namespaces': getattr(opts, 'namespaces', {}),
+            'extensions': dict([(k, functools.partial(method, self))
+                                for k, method in opts.extensions.iteritems()]),}
+
+        if ns is not None:
+            xpath_kwargs['namespaces'].update(ns)
+        if ext is not None:
+            xpath_kwargs['extensions'].update(ext)
+        return xpath_kwargs
+
+    def _get_xpath_eval(self, namespaces=None, extensions=None):
+        xpath_kwargs = self._merge_xpath_kwargs(ns=namespaces, ext=extensions)
+        return etree.XPathEvaluator(self._get_etree_val(), **xpath_kwargs)
+
+    def xpath(self, query, namespaces=None, extensions=None):
+        """
+        Evaluate and return the results of an XPath query expression on the
+        xml model.
+
+        query:      The XPath query string
+        namespaces: (optional) dict of extra prefix/uri namespaces pairs to
+                    pass to lxml.etree.XPathEvaluator()
+        extensions: (optional) Extra extensions to pass on to
+                    lxml.etree.XPathEvaluator()
+        """
+        if namespaces is None and extensions is None:
+            xpath_eval = self.default_xpath_eval
+        else:
+            xpath_eval = self._get_xpath_eval(ns=namespaces, ext=extensions)
+        return xpath_eval(query)
 
     @classmethod
     def create_from_string(cls, xml_source, parser=None):
