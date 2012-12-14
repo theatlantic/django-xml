@@ -1,7 +1,7 @@
 from .signals import xmlclass_prepared
 from .loading import get_xml_model
-from .fields import (XmlField, XPathSingleNodeField, XPathSingleNodeField,
-                     XPathListField, XsltField,)
+from .fields import (SchematronField, XmlField, XPathSingleNodeField,
+                     XPathSingleNodeField, XPathListField, XsltField,)
 
 
 RECURSIVE_RELATIONSHIP_CONSTANT = 'self'
@@ -138,6 +138,23 @@ class EmbeddedXsltField(XsltField, EmbeddedField):
 
     def to_python(self, value):
         value = super(EmbeddedXsltField, self).to_python(value)
+        if value is None:
+            return value
+        else:
+            return self.embedded_model(value)
+
+    def contribute_to_class(self, cls, name):
+        EmbeddedField.contribute_to_class(self, cls, name)
+
+
+class EmbeddedSchematronField(SchematronField, EmbeddedField):
+
+    def __init__(self, xml_model, *args, **kwargs):
+        self.embedded_model = xml_model
+        super(EmbeddedSchematronField, self).__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        value = super(EmbeddedSchematronField, self).to_python(value)
         if value is None:
             return value
         else:

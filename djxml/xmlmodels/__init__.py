@@ -10,6 +10,6 @@ from .fields import (XmlElementField, XmlPrimaryElementField,
                      XPathFloatListField, XPathDateTimeListField, XsltField,
                      XPathHtmlField, XPathHtmlListField,
                      XPathInnerHtmlField, XPathInnerHtmlListField,
-                     XPathBooleanField, XPathBooleanListField,)
+                     XPathBooleanField, XPathBooleanListField, SchematronField,)
 from .related import (EmbeddedXPathField, EmbeddedXPathListField,
-                      EmbeddedXsltField,)
+                      EmbeddedXsltField, EmbeddedSchematronField,)
