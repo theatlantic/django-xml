@@ -189,8 +189,11 @@ class XPathField(XmlField):
         if nodes is None:
             if not self.value_initialized or not self.required:
                 return nodes
-        num_nodes = len(nodes)
-        if self.required and num_nodes == 0:
+        try:
+            node_count = len(nodes)
+        except TypeError:
+            node_count = 1
+        if self.required and node_count == 0:
             msg = u"XPath query %r did not match any nodes" % self.xpath_query
             raise model_instance.DoesNotExist(msg)
 
@@ -258,7 +261,14 @@ class XPathSingleNodeField(XPathField):
         if nodes is None:
             if not self.value_initialized or not self.required:
                 return nodes
-        if not self.ignore_extra_nodes and len(nodes) > 1:
+        if isinstance(nodes, basestring):
+            node_count = 1
+        else:
+            try:
+                node_count = len(nodes)
+            except TypeError:
+                node_count = 1
+        if not self.ignore_extra_nodes and node_count > 1:
             msg = u"XPath query %r matched more than one node" \
                 % self.xpath_query
             raise model_instance.MultipleObjectsReturned(msg)
@@ -317,7 +327,14 @@ class XPathIntegerField(XPathTextField):
         if value is None:
             return value
         else:
-            return int(value)
+            try:
+                return int(value)
+            except ValueError:
+                value = float(value)
+                if not value.is_integer():
+                    raise
+                else:
+                    return int(value)
 
 
 class XPathFloatField(XPathTextField):
