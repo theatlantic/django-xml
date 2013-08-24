@@ -31,8 +31,14 @@ django database models.
 
 ## Installation
 
-Because this is a project under active development, the recommended
-installation method is from source with pip:
+To install the latest stable release of django-xml, use pip or easy_install
+
+```bash
+pip install django-xml
+easy_install django-xml
+```
+
+For the latest development version, install from source with pip:
 
 ```bash
 pip install -e git+git://github.com/theatlantic/django-xml#egg=django-xml
