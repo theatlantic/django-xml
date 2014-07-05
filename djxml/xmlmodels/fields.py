@@ -1,8 +1,7 @@
 import re
 
+import copy
 from lxml import etree, isoschematron
-
-import django.utils.copycompat as copy
 
 from django.core.exceptions import ValidationError
 from django.utils.encoding import force_unicode

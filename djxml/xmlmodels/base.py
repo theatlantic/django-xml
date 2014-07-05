@@ -3,13 +3,13 @@ import sys
 import codecs
 import functools
 
+import copy
 from lxml import etree
 
 from django.core.exceptions import (ObjectDoesNotExist, FieldError,
                                     MultipleObjectsReturned,)
 from django.db.models.base import subclass_exception
 from django.utils.encoding import smart_str, force_unicode
-import django.utils.copycompat as copy
 
 from . import signals
 from .options import Options, DEFAULT_NAMES
