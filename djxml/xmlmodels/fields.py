@@ -1,4 +1,5 @@
 import re
+import copy
 
 import copy
 from lxml import etree, isoschematron

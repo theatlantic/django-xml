@@ -2,6 +2,7 @@ import re
 import sys
 import codecs
 import functools
+import copy
 
 import copy
 from lxml import etree
@@ -11,7 +12,7 @@ from django.core.exceptions import (ObjectDoesNotExist, FieldError,
 from django.db.models.base import subclass_exception
 from django.utils.encoding import smart_str, force_unicode
 
-from . import signals
+from .signals import xmlclass_prepared
 from .options import Options, DEFAULT_NAMES
 from .loading import register_xml_models, get_xml_model
 
@@ -123,7 +124,7 @@ class XmlModelBase(type):
         if cls.__doc__ is None:
             cls.__doc__ = "%s(%s)" % (cls.__name__, ", ".join([f.attname for f in opts.fields]))
 
-        signals.xmlclass_prepared.send(sender=cls)
+        xmlclass_prepared.send(sender=cls)
 
 
 class XmlModel(object):
