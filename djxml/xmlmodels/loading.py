@@ -5,10 +5,11 @@ More or less identical to django.db.models.loading, with a few db
 specific things removed.
 """
 
+from importlib import import_module
+from collections import OrderedDict
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.datastructures import SortedDict
-from django.utils.importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
 import sys
@@ -27,11 +28,11 @@ class AppCache(object):
     # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/66531.
     __shared_state = dict(
         # Keys of app_store are the xml_model modules for each application.
-        app_store = SortedDict(),
+        app_store = OrderedDict(),
 
         # Mapping of app_labels to a dictionary of xml_model names to model
         # code.
-        app_xml_models = SortedDict(),
+        app_xml_models = OrderedDict(),
 
         # Mapping of app_labels to errors raised when trying to import the app
         app_errors = {},
@@ -168,7 +169,7 @@ class AppCache(object):
             pass
         self._populate()
         if app_mod:
-            app_list = [self.app_xml_models.get(app_mod.__name__.split('.')[-2], SortedDict())]
+            app_list = [self.app_xml_models.get(app_mod.__name__.split('.')[-2], OrderedDict())]
         else:
             app_list = self.app_xml_models.itervalues()
         xml_model_list = []
@@ -189,7 +190,7 @@ class AppCache(object):
         """
         if seed_cache:
             self._populate()
-        return self.app_xml_models.get(app_label, SortedDict()).get(
+        return self.app_xml_models.get(app_label, OrderedDict()).get(
             model_name.lower())
 
     def register_xml_models(self, app_label, *xml_models):
@@ -200,7 +201,7 @@ class AppCache(object):
             # Store as 'name: model' pair in a dictionary
             # in the app_models dictionary
             model_name = model._meta.object_name.lower()
-            model_dict = self.app_xml_models.setdefault(app_label, SortedDict())
+            model_dict = self.app_xml_models.setdefault(app_label, OrderedDict())
             if model_name in model_dict:
                 # The same model may be imported via different paths (e.g.
                 # appname.xml_models and project.appname.xml_models). We use the

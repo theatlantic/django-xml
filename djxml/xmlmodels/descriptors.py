@@ -1,4 +1,6 @@
+import six
 import functools
+
 from lxml import etree
 
 from .exceptions import XsltException
@@ -83,7 +85,7 @@ class XPathObjectDescriptor(ImmutableCreator):
             namespaces.update(getattr(self.field, 'extra_namespaces', {}))
 
             extensions = {}
-            for k, method in instance._meta.extensions.iteritems():
+            for k, method in six.iteritems(instance._meta.extensions):
                 extensions[k] = functools.partial(method, instance)
             extensions.update(self.field.extensions)
 
@@ -117,7 +119,7 @@ class XsltObjectDescriptor(ImmutableCreator):
             xslt_tree = self.field.get_xslt_tree(instance)
 
             extensions = {}
-            for k, method in instance._meta.extensions.iteritems():
+            for k, method in six.iteritems(instance._meta.extensions):
                 extensions[k] = functools.partial(method, instance)
             extensions.update(self.field.extensions)
 
@@ -126,7 +128,7 @@ class XsltObjectDescriptor(ImmutableCreator):
                 def wrapper(*args, **kwargs):
                     try:
                         xslt_result = xslt_func(tree, *args, **kwargs)
-                    except etree.XSLTApplyError, e:
+                    except etree.XSLTApplyError as e:
                         # Put this in frame locals for debugging
                         xslt_source = etree.tostring(xslt_tree, encoding='utf8')
                         raise XsltException(e, xslt_func)

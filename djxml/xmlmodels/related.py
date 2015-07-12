@@ -1,3 +1,5 @@
+import six
+
 from .signals import xmlclass_prepared
 from .loading import get_xml_model
 from .fields import (SchematronField, XmlField, XPathSingleNodeField,
@@ -88,7 +90,7 @@ class EmbeddedField(XmlField):
         self.model = cls
 
         # Set up for lazy initialized embedded models
-        if isinstance(self.embedded_model, basestring):
+        if isinstance(self.embedded_model, six.string_types):
             def _resolve_lookup(field, resolved_model, cls):
                 field.embedded_model = resolved_model
             add_lazy_relation(cls, self, self.embedded_model, _resolve_lookup)

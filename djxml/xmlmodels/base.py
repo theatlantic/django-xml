@@ -3,14 +3,18 @@ import sys
 import codecs
 import functools
 import copy
+import six
 
-import copy
 from lxml import etree
 
 from django.core.exceptions import (ObjectDoesNotExist, FieldError,
                                     MultipleObjectsReturned,)
 from django.db.models.base import subclass_exception
-from django.utils.encoding import smart_str, force_unicode
+try:
+    from django.utils.encoding import (
+        smart_bytes as smart_str, force_text as force_unicode)
+except ImportError:
+    from django.utils.encoding import smart_str, force_unicode
 
 from .signals import xmlclass_prepared
 from .options import Options, DEFAULT_NAMES
@@ -127,9 +131,8 @@ class XmlModelBase(type):
         xmlclass_prepared.send(sender=cls)
 
 
+@six.add_metaclass(XmlModelBase)
 class XmlModel(object):
-
-    __metaclass__ = XmlModelBase
 
     def __init__(self, root_element_tree):
         fields_iter = iter(self._meta.fields)
@@ -166,7 +169,7 @@ class XmlModel(object):
         xpath_kwargs = {
             'namespaces': getattr(opts, 'namespaces', {}),
             'extensions': dict([(k, functools.partial(method, self))
-                                for k, method in opts.extensions.iteritems()]),}
+                                for k, method in six.iteritems(opts.extensions)]),}
 
         if ns is not None:
             xpath_kwargs['namespaces'].update(ns)

@@ -1,11 +1,14 @@
 import re
 import copy
+import six
 
-import copy
 from lxml import etree, isoschematron
 
 from django.core.exceptions import ValidationError
-from django.utils.encoding import force_unicode
+try:
+    from django.utils.encoding import force_text as force_unicode
+except ImportError:
+    from django.utils.encoding import force_unicode
 
 from .descriptors import ImmutableFieldBase, XPathFieldBase, XsltFieldBase
 from .exceptions import XmlSchemaValidationError
@@ -43,6 +46,9 @@ class XmlField(object):
     def __cmp__(self, other):
         # This is needed because bisect does not take a comparison function.
         return cmp(self.creation_counter, other.creation_counter)
+
+    def __lt__(self, other):
+        return self.creation_counter < other.creation_counter
 
     def __deepcopy__(self, memodict):
         # We don't have to deepcopy very much here, since most things are not
@@ -104,9 +110,8 @@ class XmlField(object):
         return None
 
 
+@six.add_metaclass(ImmutableFieldBase)
 class XmlElementField(XmlField):
-
-    __metaclass__ = ImmutableFieldBase
 
     def validate(self, value, model_instance):
         if value is None:
@@ -141,7 +146,7 @@ class XmlPrimaryElementField(XmlElementField):
         if model_instance._meta.xsd_schema is not None:
             try:
                 model_instance._meta.xsd_schema.assertValid(value)
-            except Exception, e:
+            except Exception as e:
                 raise XmlSchemaValidationError(unicode(e))
 
     def contribute_to_class(self, cls, name):
@@ -152,13 +157,12 @@ class XmlPrimaryElementField(XmlElementField):
         cls._meta.root_field = self
 
 
+@six.add_metaclass(XPathFieldBase)
 class XPathField(XmlField):
     """
     Base field for abstracting the retrieval of node results from the xpath
     evaluation of an xml etree.
     """
-
-    __metaclass__ = XPathFieldBase
 
     #: XPath query string
     xpath_query = None
@@ -261,7 +265,7 @@ class XPathSingleNodeField(XPathField):
         if nodes is None:
             if not self.value_initialized or not self.required:
                 return nodes
-        if isinstance(nodes, basestring):
+        if isinstance(nodes, six.string_types):
             node_count = 1
         else:
             try:
@@ -281,7 +285,7 @@ class XPathSingleNodeField(XPathField):
                 return None
             else:
                 return value[0]
-        elif isinstance(value, basestring):
+        elif isinstance(value, six.string_types):
             return value
         else:
             # Possible throw exception here
@@ -543,17 +547,17 @@ class XPathHtmlListField(XPathListField):
 class XPathInnerHtmlMixin(object):
 
     self_closing_re = re.compile(
-        ur'<(area|base(?:font)?|frame|col|br|hr|input|img|link|meta|param)'
-        ur'([^/>]*?)></\1>')
+        r'<(area|base(?:font)?|frame|col|br|hr|input|img|link|meta|param)'
+        r'([^/>]*?)></\1>')
 
     def get_inner_html(self, value):
-        if not isinstance(value, basestring):
+        if not isinstance(value, six.string_types):
             return value
         # Strip surrounding tag
         value = re.sub(r"^(?s)<([^>\s]*)(?:[^>]*>|>)(.*)</\1>$", r'\2', value)
         # Replace open-close tags into self-closing where appropriate
         # e.g. "<br></br>" => "<br/>"
-        value = self.self_closing_re.sub(ur'<\1\2/>', value)
+        value = self.self_closing_re.sub(r'<\1\2/>', value)
         # Remove leading and trailing whitespace
         value = value.strip()
         return value
@@ -577,9 +581,8 @@ class XPathInnerHtmlListField(XPathInnerHtmlMixin, XPathHtmlListField):
         return [self.get_inner_html(v) for v in value]
 
 
+@six.add_metaclass(XsltFieldBase)
 class XsltField(XmlField):
-
-    __metaclass__ = XsltFieldBase
 
     #: Instance of lxml.etree.XMLParser
     parser = None
@@ -622,9 +625,8 @@ class XsltField(XmlField):
         return self._xslt_tree
 
 
+@six.add_metaclass(XsltFieldBase)
 class SchematronField(XmlField):
-
-    __metaclass__ = XsltFieldBase
 
     #: Instance of lxml.etree.XMLParser
     parser = None

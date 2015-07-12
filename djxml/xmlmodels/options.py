@@ -1,10 +1,13 @@
 from bisect import bisect
+from collections import OrderedDict
 
 from lxml import etree
 
 from django.db.models.fields import FieldDoesNotExist
-from django.utils.datastructures import SortedDict
-from django.utils.encoding import smart_str
+try:
+    from django.utils.encoding import smart_bytes as smart_str
+except ImportError:
+    from django.utils.encoding import smart_str
 
 from .exceptions import ExtensionNamespaceException
 from .fields import XmlPrimaryElementField
@@ -43,7 +46,7 @@ class Options(object):
         # Dict passed as kwargs to create lxml.etree.XMLParser instance
         self.parser_opts = parser_opts or {}
         self.parser = None
-        self.parents = SortedDict()
+        self.parents = OrderedDict()
 
     def contribute_to_class(self, cls, name):
         cls._meta = self
