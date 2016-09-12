@@ -199,7 +199,7 @@ class XmlModel(object):
         return xpath_eval(query)
 
     @classmethod
-    def create_from_string(cls, xml_source, parser=None):
+    def create_from_string(cls, xml_source, parser=None, additional_args=dict()):
         opts = cls._meta
         if parser is None:
             parser = opts.get_parser()
@@ -207,6 +207,10 @@ class XmlModel(object):
         # so we strip out encoding="utf-8" with a regex
         xml_source = re.sub(r'(<\?xml[^\?]*?) encoding="(?:utf-8|UTF-8)"([^\?]*?\?>)',
                             r'\1\2', xml_source)
+        d = cls.__dict__
+        for item in d.values():
+            if type(item).__name__ == 'XPathObjectDescriptor':
+                item.__dict__['field'].__dict__['xpath_query'] = item.__dict__['field'].__dict__['xpath_query'].format(**additional_args)
         tree = etree.XML(xml_source, parser)
         return cls(tree)
 
