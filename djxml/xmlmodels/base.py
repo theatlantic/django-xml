@@ -10,11 +10,8 @@ from lxml import etree
 from django.core.exceptions import (ObjectDoesNotExist, FieldError,
                                     MultipleObjectsReturned,)
 from django.db.models.base import subclass_exception
-try:
-    from django.utils.encoding import (
-        smart_bytes as smart_str, force_text as force_unicode)
-except ImportError:
-    from django.utils.encoding import smart_str, force_unicode
+from django.utils.encoding import smart_str, force_text
+from django.utils.encoding import python_2_unicode_compatible
 
 from .signals import xmlclass_prepared
 from .options import Options, DEFAULT_NAMES
@@ -130,7 +127,7 @@ class XmlModelBase(type):
 
         xmlclass_prepared.send(sender=cls)
 
-
+@python_2_unicode_compatible
 @six.add_metaclass(XmlModelBase)
 class XmlModel(object):
 
@@ -218,14 +215,14 @@ class XmlModel(object):
 
     def __repr__(self):
         try:
-            u = unicode(self)
+            u = smart_str(self)
         except (UnicodeEncodeError, UnicodeDecodeError):
             u = '[Bad Unicode data]'
         return smart_str(u'<%s: %s>' % (self.__class__.__name__, u))
 
     def __str__(self):
         if hasattr(self, '__unicode__'):
-            return force_unicode(self).encode('utf-8')
+            return force_text(self).encode('utf-8')
         return '%s object' % self.__class__.__name__
 
     def __eq__(self, other):
