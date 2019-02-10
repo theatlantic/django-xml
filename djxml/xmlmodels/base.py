@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import re
 import sys
 import codecs
@@ -218,7 +219,7 @@ class XmlModel(object):
 
     def __repr__(self):
         try:
-            u = unicode(self)
+            u = six.text_type(self)
         except (UnicodeEncodeError, UnicodeDecodeError):
             u = '[Bad Unicode data]'
         return smart_str(u'<%s: %s>' % (self.__class__.__name__, u))

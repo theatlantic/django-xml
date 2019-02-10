@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import re
 import copy
 import six
@@ -147,7 +148,7 @@ class XmlPrimaryElementField(XmlElementField):
             try:
                 model_instance._meta.xsd_schema.assertValid(value)
             except Exception as e:
-                raise XmlSchemaValidationError(unicode(e))
+                raise XmlSchemaValidationError(six.text_type(e))
 
     def contribute_to_class(self, cls, name):
         assert not cls._meta.has_root_field, \
@@ -310,7 +311,7 @@ class XPathTextField(XPathSingleNodeField):
             if self.required and value in self.none_vals:
                 error_msg = (u"%(field)s is required, but value %(value)r is "
                              u"mapped to None") % {
-                                "field": unicode(self),
+                                "field": six.text_type(self),
                                 "value": value,}
                 raise model_instance.DoesNotExist(error_msg)
 

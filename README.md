@@ -1,5 +1,8 @@
 # django-xml
 
+[![Build Status](https://travis-ci.org/theatlantic/django-xml.svg?branch=py3compat)](https://travis-ci.org/theatlantic/django-xml)
+
+
 **django-xml** is a python module which provides an abstraction to
 [lxml](http://lxml.de/)'s XPath and XSLT functionality in a manner resembling
 django database models.
@@ -179,7 +182,7 @@ A dict of extra prefix/uri namespace pairs to pass to
 
 #### extensions<br>`XPathField.extensions`
 
-Extra extensions to pass on to 
+Extra extensions to pass on to
 [`lxml.etree.XSLT`](http://lxml.de/api/lxml.etree-module.html#XPathEvaluator).
 See the [lxml documentation](http://lxml.de/extensions.html#evaluator-local-extensions)
 for details on how to form the <b>`extensions`</b> keyword argument.

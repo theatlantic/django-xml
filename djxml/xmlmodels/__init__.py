@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from .loading import (get_apps, get_app, get_xml_models, get_xml_model,
                       register_xml_models,)
 from . import signals
