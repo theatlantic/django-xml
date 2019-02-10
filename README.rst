@@ -1,9 +1,19 @@
 django-xml
 ##########
 
+.. image:: https://travis-ci.org/theatlantic/django-xml.svg?branch=master
+    :target: https://travis-ci.org/theatlantic/django-xml
+
+
 **django-xml** is a python module which provides an abstraction to
 `lxml <http://lxml.de/>`_'s XPath and XSLT functionality in a manner
 resembling django database models.
+
+Note
+====
+
+Version 2.0 drops support for Django < 1.11. Version 3.0 will drop support for 
+Python < 3.4.
 
 
 Installation

@@ -1,5 +1,6 @@
 """Provides the entrypoint in setup.py for the create_readme_rst command"""
 
+from __future__ import absolute_import
 import os
 import codecs
 import setuptools

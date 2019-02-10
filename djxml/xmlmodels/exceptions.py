@@ -1,4 +1,6 @@
+from __future__ import absolute_import
 from django.core.exceptions import ValidationError
+from django.utils import six
 
 class XmlModelException(Exception):
     pass
@@ -19,7 +21,7 @@ class XsltException(XmlModelException):
         return str(self.apply_exception)
 
     def __unicode__(self):
-        msg = unicode(self.apply_exception)
+        msg = six.text_type(self.apply_exception)
         debug_output = self.get_debug_output()
         if len(debug_output) > 0:
             msg += u"\n\n" + debug_output

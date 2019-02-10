@@ -19,11 +19,12 @@ except IOError:
 
 setup(
     name='django-xml',
-    version="1.4.1",
+    version="2.0.0",
     install_requires=[
         'lxml',
         'pytz',
         'python-dateutil',
+        'Django>=1.11',
     ],
     description="Provides an abstraction to lxml's XPath and XSLT " + \
                 "functionality in a manner resembling django database models",

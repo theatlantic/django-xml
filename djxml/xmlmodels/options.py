@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from bisect import bisect
 from collections import OrderedDict
 
@@ -72,7 +73,7 @@ class Options(object):
             # Any leftover attributes must be invalid.
             if meta_attrs != {}:
                 raise TypeError("'class Meta' got invalid attribute(s): %s" \
-                    % ','.join(meta_attrs.keys()))
+                    % ','.join(list(meta_attrs.keys())))
                 if self.xsd_schema is not None and self.xsd_schema_file is not None:
                     raise TypeError("'class Meta' got attribute 'xsd_schema' "
                                      "and 'xsd_schema_file'; only one may be "
