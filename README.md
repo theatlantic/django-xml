@@ -1,6 +1,6 @@
 # django-xml
 
-[![Build Status](https://travis-ci.org/theatlantic/django-xml.svg?branch=py3compat)](https://travis-ci.org/theatlantic/django-xml)
+[![Build Status](https://travis-ci.org/theatlantic/django-xml.svg?branch=master)](https://travis-ci.org/theatlantic/django-xml)
 
 
 **django-xml** is a python module which provides an abstraction to
