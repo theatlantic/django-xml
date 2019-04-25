@@ -68,11 +68,11 @@ class XmlModelBase(type):
         new_class.add_to_class('DoesNotExist', subclass_exception('DoesNotExist',
                 tuple(x.DoesNotExist
                         for x in parents if hasattr(x, '_meta'))
-                                or (ObjectDoesNotExist,), module))
+                                or (ObjectDoesNotExist,), module, None))
         new_class.add_to_class('MultipleObjectsReturned', subclass_exception('MultipleObjectsReturned',
                 tuple(x.MultipleObjectsReturned
                         for x in parents if hasattr(x, '_meta'))
-                                or (MultipleObjectsReturned,), module))
+                                or (MultipleObjectsReturned,), module, None))
 
         # Bail out early if we have already created this class.
         m = get_xml_model(new_class._meta.app_label, name, False)
