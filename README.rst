@@ -12,8 +12,9 @@ resembling django database models.
 Note
 ====
 
-Version 2.0 drops support for Django < 1.11. Version 3.0 will drop support for 
-Python < 3.4.
+* Version 2.0 drops support for Django < 1.11
+* Version 2.0.1 drops support for Python 3.4
+* Version 3.0 will drop support for Python < 3.5
 
 
 Installation
