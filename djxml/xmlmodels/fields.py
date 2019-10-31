@@ -653,10 +653,10 @@ class SchematronField(XmlField):
             'store_report': True,
             'store_schematron': True,
         }
-
-        for k in self.schematron_kwargs.keys():
-            if self.schematron_kwargs[k] is None:
-                del self.schematron_kwargs[k]
+        self.schematron_kwargs = {
+            k: v for k, v in self.schematron_kwargs.items()
+            if v is not None
+        }
 
         super(SchematronField, self).__init__(**kwargs)
 
