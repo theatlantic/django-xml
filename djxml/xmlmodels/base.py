@@ -11,15 +11,15 @@ from lxml import etree
 from django.core.exceptions import (ObjectDoesNotExist, FieldError,
                                     MultipleObjectsReturned,)
 from django.db.models.base import subclass_exception
-try:
-    from django.utils.encoding import (
-        smart_bytes as smart_str, force_text as force_unicode)
-except ImportError:
-    from django.utils.encoding import smart_str, force_unicode
+from django.utils.encoding import force_text
+from django.utils.encoding import smart_bytes, smart_text
 
 from .signals import xmlclass_prepared
 from .options import Options, DEFAULT_NAMES
 from .loading import register_xml_models, get_xml_model
+
+# Alias smart_str based on Python version
+smart_str = smart_text if six.PY3 else smart_bytes
 
 
 class XmlModelBase(type):
@@ -231,7 +231,7 @@ class XmlModel(object):
 
     def __str__(self):
         if hasattr(self, '__unicode__'):
-            return force_unicode(self).encode('utf-8')
+            return force_text(self).encode('utf-8')
         return '%s object' % self.__class__.__name__
 
     def __eq__(self, other):
