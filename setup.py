@@ -25,6 +25,7 @@ setup(
         'pytz',
         'python-dateutil',
         'Django>=1.11',
+        'six',
     ],
     description="Provides an abstraction to lxml's XPath and XSLT " + \
                 "functionality in a manner resembling django database models",
