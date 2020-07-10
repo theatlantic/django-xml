@@ -19,7 +19,7 @@ except IOError:
 
 setup(
     name='django-xml',
-    version="2.0.2",
+    version="2.1.0",
     install_requires=[
         'lxml',
         'pytz',
