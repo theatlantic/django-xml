@@ -4,7 +4,8 @@ from collections import OrderedDict
 
 from lxml import etree
 
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
+
 try:
     from django.utils.encoding import smart_bytes as smart_str
 except ImportError:
