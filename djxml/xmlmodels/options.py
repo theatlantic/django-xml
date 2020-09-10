@@ -1,18 +1,18 @@
 from __future__ import absolute_import
 from bisect import bisect
 from collections import OrderedDict
+import six
 
 from lxml import etree
 
 from django.core.exceptions import FieldDoesNotExist
-
-try:
-    from django.utils.encoding import smart_bytes as smart_str
-except ImportError:
-    from django.utils.encoding import smart_str
+from django.utils.encoding import smart_bytes, smart_text
 
 from .exceptions import ExtensionNamespaceException
 from .fields import XmlPrimaryElementField
+
+# Alias smart_str based on Python version
+smart_str = smart_text if six.PY3 else smart_bytes
 
 DEFAULT_NAMES = ('app_label', 'namespaces', 'parser_opts', 'extension_ns_uri',
                  'xsd_schema', 'xsd_schema_file',)

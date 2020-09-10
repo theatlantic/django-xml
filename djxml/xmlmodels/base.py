@@ -11,15 +11,15 @@ from lxml import etree
 from django.core.exceptions import (ObjectDoesNotExist, FieldError,
                                     MultipleObjectsReturned,)
 from django.db.models.base import subclass_exception
-try:
-    from django.utils.encoding import (
-        smart_bytes as smart_str, force_text as force_unicode)
-except ImportError:
-    from django.utils.encoding import smart_str, force_unicode
+from django.utils.encoding import force_text
+from django.utils.encoding import smart_bytes, smart_text
 
 from .signals import xmlclass_prepared
 from .options import Options, DEFAULT_NAMES
 from .loading import register_xml_models, get_xml_model
+
+# Alias smart_str based on Python version
+smart_str = smart_text if six.PY3 else smart_bytes
 
 
 class XmlModelBase(type):
@@ -36,7 +36,12 @@ class XmlModelBase(type):
 
         # Create the class.
         module = attrs.pop('__module__')
-        new_class = super_new(cls, name, bases, {'__module__': module})
+        new_attrs = {'__module__': module}
+        classcell = attrs.pop('__classcell__', None)
+        if classcell is not None:
+            new_attrs['__classcell__'] = classcell
+        new_class = super_new(cls, name, bases, new_attrs)
+
         attr_meta = attrs.pop('Meta', None)
         if not attr_meta:
             meta = getattr(new_class, 'Meta', None)
@@ -64,15 +69,24 @@ class XmlModelBase(type):
                         break
 
         new_class.add_to_class('_meta', Options(meta, **kwargs))
-
-        new_class.add_to_class('DoesNotExist', subclass_exception('DoesNotExist',
-                tuple(x.DoesNotExist
-                        for x in parents if hasattr(x, '_meta'))
-                                or (ObjectDoesNotExist,), module, new_class))
-        new_class.add_to_class('MultipleObjectsReturned', subclass_exception('MultipleObjectsReturned',
-                tuple(x.MultipleObjectsReturned
-                        for x in parents if hasattr(x, '_meta'))
-                                or (MultipleObjectsReturned,), module, new_class))
+        new_class.add_to_class(
+            'DoesNotExist',
+            subclass_exception(
+                'DoesNotExist',
+                tuple(
+                    x.DoesNotExist for x in parents if hasattr(x, '_meta')
+                ) or (ObjectDoesNotExist,),
+                module,
+                =new_class))
+        new_class.add_to_class(
+            'MultipleObjectsReturned',
+            subclass_exception(
+                'MultipleObjectsReturned',
+                tuple(
+                    x.MultipleObjectsReturned for x in parents if hasattr(x, '_meta')
+                ) or (MultipleObjectsReturned,),
+                module,
+                new_class))
 
         # Bail out early if we have already created this class.
         m = get_xml_model(new_class._meta.app_label, name, False)
@@ -226,7 +240,7 @@ class XmlModel(object):
 
     def __str__(self):
         if hasattr(self, '__unicode__'):
-            return force_unicode(self).encode('utf-8')
+            return force_text(self).encode('utf-8')
         return '%s object' % self.__class__.__name__
 
     def __eq__(self, other):
