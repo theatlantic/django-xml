@@ -77,7 +77,7 @@ class XmlModelBase(type):
                     x.DoesNotExist for x in parents if hasattr(x, '_meta')
                 ) or (ObjectDoesNotExist,),
                 module,
-                =new_class))
+                new_class))
         new_class.add_to_class(
             'MultipleObjectsReturned',
             subclass_exception(
