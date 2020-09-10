@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from django.core.exceptions import ValidationError
-from django.utils import six
+import six
 
 class XmlModelException(Exception):
     pass

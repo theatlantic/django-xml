@@ -69,7 +69,6 @@ class XmlModelBase(type):
                         break
 
         new_class.add_to_class('_meta', Options(meta, **kwargs))
-
         new_class.add_to_class(
             'DoesNotExist',
             subclass_exception(
@@ -78,7 +77,7 @@ class XmlModelBase(type):
                     x.DoesNotExist for x in parents if hasattr(x, '_meta')
                 ) or (ObjectDoesNotExist,),
                 module,
-                attached_to=new_class))
+                new_class))
         new_class.add_to_class(
             'MultipleObjectsReturned',
             subclass_exception(
@@ -87,7 +86,7 @@ class XmlModelBase(type):
                     x.MultipleObjectsReturned for x in parents if hasattr(x, '_meta')
                 ) or (MultipleObjectsReturned,),
                 module,
-                attached_to=new_class))
+                new_class))
 
         # Bail out early if we have already created this class.
         m = get_xml_model(new_class._meta.app_label, name, False)

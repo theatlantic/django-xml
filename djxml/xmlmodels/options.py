@@ -5,7 +5,7 @@ import six
 
 from lxml import etree
 
-from django.db.models.fields import FieldDoesNotExist
+from django.core.exceptions import FieldDoesNotExist
 from django.utils.encoding import smart_bytes, smart_text
 
 from .exceptions import ExtensionNamespaceException
