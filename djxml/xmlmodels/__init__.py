@@ -1,10 +1,9 @@
-from __future__ import absolute_import
-from .loading import (get_apps, get_app, get_xml_models, get_xml_model,
+from .loading import (get_apps, get_app, get_xml_models, get_xml_model,  # noqa
                       register_xml_models,)
-from . import signals
-from .base import XmlModel
-from .decorators import lxml_extension
-from .fields import (XmlElementField, XmlPrimaryElementField,
+from . import signals  # noqa
+from .base import XmlModel  # noqa
+from .decorators import lxml_extension  # noqa
+from .fields import (XmlElementField, XmlPrimaryElementField,  # noqa
                      XPathSingleNodeField, XPathTextField, XPathIntegerField,
                      XPathFloatField, XPathDateTimeField, XPathListField,
                      XPathTextListField, XPathIntegerListField,
@@ -12,5 +11,5 @@ from .fields import (XmlElementField, XmlPrimaryElementField,
                      XPathHtmlField, XPathHtmlListField,
                      XPathInnerHtmlField, XPathInnerHtmlListField,
                      XPathBooleanField, XPathBooleanListField, SchematronField,)
-from .related import (EmbeddedXPathField, EmbeddedXPathListField,
+from .related import (EmbeddedXPathField, EmbeddedXPathListField,  # noqa
                       EmbeddedXsltField, EmbeddedSchematronField,)
