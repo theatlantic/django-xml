@@ -1,10 +1,8 @@
-from __future__ import absolute_import
 import re
 import sys
 import codecs
 import functools
 import copy
-import six
 
 from lxml import etree
 
@@ -12,14 +10,11 @@ from django.core.exceptions import (ObjectDoesNotExist, FieldError,
                                     MultipleObjectsReturned,)
 from django.db.models.base import subclass_exception
 from django.utils.encoding import force_text
-from django.utils.encoding import smart_bytes, smart_text
+from django.utils.encoding import smart_bytes, smart_str
 
 from .signals import xmlclass_prepared
 from .options import Options, DEFAULT_NAMES
 from .loading import register_xml_models, get_xml_model
-
-# Alias smart_str based on Python version
-smart_str = smart_text if six.PY3 else smart_bytes
 
 
 class XmlModelBase(type):
@@ -147,8 +142,7 @@ class XmlModelBase(type):
         xmlclass_prepared.send(sender=cls)
 
 
-@six.add_metaclass(XmlModelBase)
-class XmlModel(object):
+class XmlModel(metaclass=XmlModelBase):
 
     def __init__(self, root_element_tree):
         fields_iter = iter(self._meta.fields)
@@ -184,8 +178,8 @@ class XmlModel(object):
 
         xpath_kwargs = {
             'namespaces': getattr(opts, 'namespaces', {}),
-            'extensions': dict([(k, functools.partial(method, self))
-                                for k, method in six.iteritems(opts.extensions)]),}
+            'extensions': {k: functools.partial(method, self)
+                                for k, method in opts.extensions.items()}}
 
         if ns is not None:
             xpath_kwargs['namespaces'].update(ns)
@@ -234,14 +228,12 @@ class XmlModel(object):
 
     def __repr__(self):
         try:
-            u = six.text_type(self)
+            u = str(self)
         except (UnicodeEncodeError, UnicodeDecodeError):
             u = '[Bad Unicode data]'
         return smart_str(u'<%s: %s>' % (self.__class__.__name__, u))
 
     def __str__(self):
-        if hasattr(self, '__unicode__'):
-            return force_text(self).encode('utf-8')
         return '%s object' % self.__class__.__name__
 
     def __eq__(self, other):

@@ -1,6 +1,4 @@
-from __future__ import absolute_import
 from django.core.exceptions import ValidationError
-from django.utils import six
 
 class XmlModelException(Exception):
     pass
@@ -21,17 +19,17 @@ class XsltException(XmlModelException):
         return str(self.apply_exception)
 
     def __unicode__(self):
-        msg = six.text_type(self.apply_exception)
+        msg = str(self.apply_exception)
         debug_output = self.get_debug_output()
         if len(debug_output) > 0:
-            msg += u"\n\n" + debug_output
+            msg += "\n\n" + debug_output
         return msg
 
     def get_debug_output(self):
         debug_lines = []
         for entry in self.error_log:
-            entry_filename = u'%s ' % entry.filename if entry.filename != '<string>' else ''
-            debug_line = u'%(msg)s [%(file)sline %(line)s, col %(col)s]' % {
+            entry_filename = '%s ' % entry.filename if entry.filename != '<string>' else ''
+            debug_line = '%(msg)s [%(file)sline %(line)s, col %(col)s]' % {
                 'file': entry_filename,
                 'line': entry.line,
                 'col': entry.column,

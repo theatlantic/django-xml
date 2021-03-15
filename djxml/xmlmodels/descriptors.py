@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-import six
 import functools
 
 from lxml import etree
@@ -85,9 +83,8 @@ class XPathObjectDescriptor(ImmutableCreator):
             namespaces.update(getattr(instance._meta, 'namespaces', {}))
             namespaces.update(getattr(self.field, 'extra_namespaces', {}))
 
-            extensions = {}
-            for k, method in six.iteritems(instance._meta.extensions):
-                extensions[k] = functools.partial(method, instance)
+            extensions = {k: functools.partial(method, instance)
+                for k, method in instance._meta.extensions.items()}
             extensions.update(self.field.extensions)
 
             xpath_eval = etree.XPathEvaluator(tree, namespaces=namespaces,
@@ -119,9 +116,8 @@ class XsltObjectDescriptor(ImmutableCreator):
             tree = instance._get_etree_val()
             xslt_tree = self.field.get_xslt_tree(instance)
 
-            extensions = {}
-            for k, method in six.iteritems(instance._meta.extensions):
-                extensions[k] = functools.partial(method, instance)
+            extensions = {k: functools.partial(method, instance)
+                for k, method in instance._meta.extensions.items()}
             extensions.update(self.field.extensions)
 
             transform = etree.XSLT(xslt_tree, extensions=extensions)

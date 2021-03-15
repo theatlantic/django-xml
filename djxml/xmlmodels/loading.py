@@ -5,7 +5,6 @@ More or less identical to django.db.models.loading, with a few db
 specific things removed.
 """
 
-from __future__ import absolute_import
 from importlib import import_module
 from collections import OrderedDict
 
@@ -16,7 +15,6 @@ from django.utils.module_loading import module_has_submodule
 import sys
 import os
 import threading
-import six
 
 __all__ = ('get_apps', 'get_app', 'get_xml_models', 'get_xml_model',
         'register_xml_models', 'load_app', 'app_cache_ready')
@@ -173,7 +171,7 @@ class AppCache(object):
         if app_mod:
             app_list = [self.app_xml_models.get(app_mod.__name__.split('.')[-2], OrderedDict())]
         else:
-            app_list = six.itervalues(self.app_xml_models)
+            app_list = self.app_xml_models.values()
         xml_model_list = []
         for app in app_list:
             xml_model_list.extend(

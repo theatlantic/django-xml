@@ -1,7 +1,5 @@
-from __future__ import absolute_import
 import re
 import copy
-import six
 
 from lxml import etree, isoschematron
 
@@ -111,8 +109,7 @@ class XmlField(object):
         return None
 
 
-@six.add_metaclass(ImmutableFieldBase)
-class XmlElementField(XmlField):
+class XmlElementField(XmlField, metaclass=ImmutableFieldBase):
 
     def validate(self, value, model_instance):
         if value is None:
@@ -148,7 +145,7 @@ class XmlPrimaryElementField(XmlElementField):
             try:
                 model_instance._meta.xsd_schema.assertValid(value)
             except Exception as e:
-                raise XmlSchemaValidationError(six.text_type(e))
+                raise XmlSchemaValidationError(str(e))
 
     def contribute_to_class(self, cls, name):
         assert not cls._meta.has_root_field, \
@@ -158,8 +155,7 @@ class XmlPrimaryElementField(XmlElementField):
         cls._meta.root_field = self
 
 
-@six.add_metaclass(XPathFieldBase)
-class XPathField(XmlField):
+class XPathField(XmlField, metaclass=XPathFieldBase):
     """
     Base field for abstracting the retrieval of node results from the xpath
     evaluation of an xml etree.
@@ -266,7 +262,7 @@ class XPathSingleNodeField(XPathField):
         if nodes is None:
             if not self.value_initialized or not self.required:
                 return nodes
-        if isinstance(nodes, six.string_types):
+        if isinstance(nodes, str):
             node_count = 1
         else:
             try:
@@ -286,7 +282,7 @@ class XPathSingleNodeField(XPathField):
                 return None
             else:
                 return value[0]
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, str):
             return value
         else:
             # Possible throw exception here
@@ -309,9 +305,9 @@ class XPathTextField(XPathSingleNodeField):
         if len(self.none_vals):
             value = self.to_python(value)
             if self.required and value in self.none_vals:
-                error_msg = (u"%(field)s is required, but value %(value)r is "
-                             u"mapped to None") % {
-                                "field": six.text_type(self),
+                error_msg = ("%(field)s is required, but value %(value)r is "
+                             "mapped to None") % {
+                                "field": str(self),
                                 "value": value,}
                 raise model_instance.DoesNotExist(error_msg)
 
@@ -387,8 +383,8 @@ class XPathBooleanField(XPathTextField):
             return
         if value not in self.true_vals and value not in self.false_vals:
             opts = model_instance._meta
-            exc_msg = (u"%(field)s on xmlmodel %(app_label)s.%(object_name)s "
-                       u"has value %(val)r not in true_vals or false_vals" % {
+            exc_msg = ("%(field)s on xmlmodel %(app_label)s.%(object_name)s "
+                       "has value %(val)r not in true_vals or false_vals" % {
                             "field": repr(self).decode('raw_unicode_escape'),
                             "app_label": opts.app_label,
                             "object_name": opts.object_name,
@@ -552,7 +548,7 @@ class XPathInnerHtmlMixin(object):
         r'([^/>]*?)></\1>')
 
     def get_inner_html(self, value):
-        if not isinstance(value, six.string_types):
+        if not isinstance(value, str):
             return value
         # Strip surrounding tag
         value = re.sub(r"^(?s)<([^>\s]*)(?:[^>]*>|>)(.*)</\1>$", r'\2', value)
@@ -582,8 +578,7 @@ class XPathInnerHtmlListField(XPathInnerHtmlMixin, XPathHtmlListField):
         return [self.get_inner_html(v) for v in value]
 
 
-@six.add_metaclass(XsltFieldBase)
-class XsltField(XmlField):
+class XsltField(XmlField, metaclass=XsltFieldBase):
 
     #: Instance of lxml.etree.XMLParser
     parser = None
@@ -626,8 +621,7 @@ class XsltField(XmlField):
         return self._xslt_tree
 
 
-@six.add_metaclass(XsltFieldBase)
-class SchematronField(XmlField):
+class SchematronField(XmlField, metaclass=XsltFieldBase):
 
     #: Instance of lxml.etree.XMLParser
     parser = None
