@@ -1,5 +1,7 @@
 # django-xml
 
+[![Test Status](https://github.com/theatlantic/django-xml/actions/workflows/test.yml/badge.svg)](https://github.com/theatlantic/django-xml/actions)
+
 **django-xml** is a python module which provides an abstraction to
 [lxml](http://lxml.de/)'s XPath and XSLT functionality in a manner resembling
 django database models.
