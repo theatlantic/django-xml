@@ -9,7 +9,7 @@ from lxml import etree
 from django.core.exceptions import (ObjectDoesNotExist, FieldError,
                                     MultipleObjectsReturned,)
 from django.db.models.base import subclass_exception
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.encoding import smart_bytes, smart_str
 
 from .signals import xmlclass_prepared
