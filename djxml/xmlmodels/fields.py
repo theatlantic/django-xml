@@ -4,7 +4,14 @@ import copy
 from lxml import etree, isoschematron
 
 from django.core.exceptions import ValidationError
-from django.utils.encoding import force_str as force_unicode
+
+try:
+    from django.utils.encoding import force_str as force_unicode  # django >= 4
+except ImportError:
+    try:
+        from django.utils.encoding import force_text as force_unicode
+    except ImportError:
+        from django.utils.encoding import force_unicode
 
 from .descriptors import ImmutableFieldBase, XPathFieldBase, XsltFieldBase
 from .exceptions import XmlSchemaValidationError
