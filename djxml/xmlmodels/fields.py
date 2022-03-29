@@ -4,15 +4,7 @@ import copy
 from lxml import etree, isoschematron
 
 from django.core.exceptions import ValidationError
-
-try:
-    from django.utils.encoding import force_str as force_unicode  # django >= 4
-except ImportError:
-    try:
-        from django.utils.encoding import force_text as force_unicode
-    except ImportError:
-        from django.utils.encoding import force_unicode
-
+from django.utils.encoding import force_str
 from .descriptors import ImmutableFieldBase, XPathFieldBase, XsltFieldBase
 from .exceptions import XmlSchemaValidationError
 from .utils import parse_datetime
@@ -109,7 +101,7 @@ class XmlField(object):
         if self.has_default():
             if callable(self.default):
                 return self.default()
-            return force_unicode(self.default, strings_only=True)
+            return force_str(self.default, strings_only=True)
         return None
 
 
@@ -301,7 +293,7 @@ class XPathTextField(XPathSingleNodeField):
     def __init__(self, *args, **kwargs):
         none_vals = kwargs.pop('none_vals', None)
         if none_vals is not None:
-            self.none_vals = [force_unicode(v) for v in none_vals]
+            self.none_vals = [force_str(v) for v in none_vals]
         super(XPathTextField, self).__init__(*args, **kwargs)
 
     def validate(self, value, model_instance):
@@ -320,9 +312,9 @@ class XPathTextField(XPathSingleNodeField):
         if value is None:
             return value
         if isinstance(value, etree._Element):
-            return force_unicode(value.text)
+            return force_str(value.text)
         else:
-            return force_unicode(value)
+            return force_str(value)
 
 
 class XPathIntegerField(XPathTextField):
@@ -414,7 +406,7 @@ class XPathTextListField(XPathListField):
         if value is None:
             return value
         else:
-            return [force_unicode(getattr(v, "text", v)) for v in value]
+            return [force_str(getattr(v, "text", v)) for v in value]
 
 
 class XPathIntegerListField(XPathTextListField):
