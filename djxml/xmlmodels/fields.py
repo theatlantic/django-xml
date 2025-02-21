@@ -551,7 +551,7 @@ class XPathInnerHtmlMixin(object):
         if not isinstance(value, str):
             return value
         # Strip surrounding tag
-        value = re.sub(r"^(?s)<([^>\s]*)(?:[^>]*>|>)(.*)</\1>$", r'\2', value)
+        value = re.sub(r"(?s)^<([^>\s]*)(?:[^>]*>|>)(.*)</\1>$", r'\2', value)
         # Replace open-close tags into self-closing where appropriate
         # e.g. "<br></br>" => "<br/>"
         value = self.self_closing_re.sub(r'<\1\2/>', value)
