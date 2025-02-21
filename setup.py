@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import re
+import os.path
 from setuptools import setup, find_packages
 
 
@@ -10,10 +12,17 @@ except IOError:
     # Use the create_readme_rst command to convert README to reStructuredText
     pass
 
+with open(os.path.join(os.path.dirname(__file__), "djxml", "__init__.py")) as f:
+    for line in f:
+        if m := re.search(r"""^__version__ = (['"])(.+?)\1$""", line):
+            version = m.group(2)
+            break
+    else:
+        raise LookupError("Unable to find __version__ in djxml/__init__.py")
 
 setup(
     name='django-xml',
-    version="3.0.0",
+    version=version,
     install_requires=[
         'lxml',
         'pytz',

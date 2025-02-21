@@ -1,4 +1,1 @@
-try:
-    __version__ = __import__('pkg_resources').get_distribution('django-xml').version
-except Exception:
-    __version__ = 'unknown'
+__version__ = "3.0.1"
