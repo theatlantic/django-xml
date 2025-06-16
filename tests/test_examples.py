@@ -1,12 +1,11 @@
 from __future__ import absolute_import
 from django import test
 
-from .xmlmodels import NumbersExample
+from tests.xmlmodels import NumbersExample
 
 
 class TestExamples(test.TestCase):
-
-    numbers_xml = u"""
+    numbers_xml = """
         <numbers>
             <num>1</num>
             <num>2</num>
@@ -27,5 +26,4 @@ class TestExamples(test.TestCase):
 
     def test_lxml_list_extension(self):
         example = NumbersExample.create_from_string(self.numbers_xml)
-        self.assertEqual(example.square_numbers,
-            [1, 4, 9, 16, 25, 36, 49])
+        self.assertEqual(example.square_numbers, [1, 4, 9, 16, 25, 36, 49])

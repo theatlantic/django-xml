@@ -9,6 +9,7 @@ class Creator(object):
     """
     A placeholder class that provides a way to set the attribute on the model.
     """
+
     def __init__(self, field):
         self.field = field
 
@@ -23,20 +24,20 @@ class Creator(object):
 
 
 class ImmutableCreator(Creator):
-
     def __init__(self, field):
-        super(ImmutableCreator, self).__init__(field)
+        super().__init__(field)
         self.field.value_initialized = False
         self.cache_name = field.get_cache_name()
 
     def __set__(self, model_instance, value):
-        if '_field_inits' not in model_instance.__dict__:
+        if "_field_inits" not in model_instance.__dict__:
             model_instance._field_inits = {}
         if model_instance._field_inits.get(self.field.name, False):
-            raise TypeError("%s.%s is immutable" \
-                % (model_instance.__class__.__name__, self.field.name))
+            raise TypeError(
+                "%s.%s is immutable" % (model_instance.__class__.__name__, self.field.name)
+            )
 
-        super(ImmutableCreator, self).__set__(model_instance, value)
+        super().__set__(model_instance, value)
 
         if model_instance.__dict__[self.field.name] is not None:
             model_instance._field_inits[self.field.name] = True
@@ -48,31 +49,31 @@ class FieldBase(type):
     A metaclass for custom Field subclasses. This ensures the model's attribute
     has the descriptor protocol attached to it.
     """
-    def __new__(cls, name, bases, attrs, **kwargs):
-        new_class = super(FieldBase, cls).__new__(cls, name, bases, attrs)
 
-        descriptor_cls_attr = getattr(cls, 'descriptor_cls', None)
+    def __new__(cls, name, bases, attrs, **kwargs):
+        new_class = super().__new__(cls, name, bases, attrs)
+
+        descriptor_cls_attr = getattr(cls, "descriptor_cls", None)
         if descriptor_cls_attr is not None:
-            kwargs['descriptor_cls'] = descriptor_cls_attr
+            kwargs["descriptor_cls"] = descriptor_cls_attr
 
         new_class.contribute_to_class = make_contrib(
-            new_class, attrs.get('contribute_to_class'), **kwargs)
+            new_class, attrs.get("contribute_to_class"), **kwargs
+        )
         return new_class
 
 
 class ImmutableFieldBase(FieldBase):
-
     descriptor_cls = ImmutableCreator
 
 
 class XPathObjectDescriptor(ImmutableCreator):
-
     def __init__(self, field):
-        super(XPathObjectDescriptor, self).__init__(field)
+        super().__init__(field)
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError('Can only be accessed via an instance.')
+            raise AttributeError("Can only be accessed via an instance.")
         try:
             return getattr(instance, self.cache_name)
         except AttributeError:
@@ -80,15 +81,16 @@ class XPathObjectDescriptor(ImmutableCreator):
             query = self.field.xpath_query
 
             namespaces = {}
-            namespaces.update(getattr(instance._meta, 'namespaces', {}))
-            namespaces.update(getattr(self.field, 'extra_namespaces', {}))
+            namespaces.update(getattr(instance._meta, "namespaces", {}))
+            namespaces.update(getattr(self.field, "extra_namespaces", {}))
 
-            extensions = {k: functools.partial(method, instance)
-                for k, method in instance._meta.extensions.items()}
+            extensions = {
+                k: functools.partial(method, instance)
+                for k, method in instance._meta.extensions.items()
+            }
             extensions.update(self.field.extensions)
 
-            xpath_eval = etree.XPathEvaluator(tree, namespaces=namespaces,
-                extensions=extensions)
+            xpath_eval = etree.XPathEvaluator(tree, namespaces=namespaces, extensions=extensions)
 
             nodes = xpath_eval(query)
             nodes = self.field.clean(nodes, instance)
@@ -97,45 +99,47 @@ class XPathObjectDescriptor(ImmutableCreator):
 
 
 class XPathFieldBase(FieldBase):
-
     descriptor_cls = XPathObjectDescriptor
 
 
 class XsltObjectDescriptor(ImmutableCreator):
-
     def __init__(self, field):
         self.cache_name = field.get_cache_name()
-        super(XsltObjectDescriptor, self).__init__(field)
+        super().__init__(field)
 
     def __get__(self, instance, instance_type=None):
         if instance is None:
-            raise AttributeError('Can only be accessed via an instance.')
+            raise AttributeError("Can only be accessed via an instance.")
         try:
             return getattr(instance, self.cache_name)
         except AttributeError:
             tree = instance._get_etree_val()
             xslt_tree = self.field.get_xslt_tree(instance)
 
-            extensions = {k: functools.partial(method, instance)
-                for k, method in instance._meta.extensions.items()}
+            extensions = {
+                k: functools.partial(method, instance)
+                for k, method in instance._meta.extensions.items()
+            }
             extensions.update(self.field.extensions)
 
             transform = etree.XSLT(xslt_tree, extensions=extensions)
+
             def xslt_wrapper(xslt_func):
                 def wrapper(*args, **kwargs):
                     try:
                         xslt_result = xslt_func(tree, *args, **kwargs)
                     except etree.XSLTApplyError as e:
                         # Put this in frame locals for debugging
-                        xslt_source = etree.tostring(xslt_tree, encoding='utf8')
+                        xslt_source = etree.tostring(xslt_tree, encoding="utf8")
                         raise XsltException(e, xslt_func)
                     return self.field.clean(xslt_result, instance)
+
                 return wrapper
+
             return xslt_wrapper(transform)
 
 
 class XsltFieldBase(FieldBase):
-
     descriptor_cls = XsltObjectDescriptor
 
 

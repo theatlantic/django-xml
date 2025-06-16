@@ -2,6 +2,7 @@ from __future__ import absolute_import
 import types
 import functools
 
+
 def lxml_extension(method=None, ns_uri=None, name=None):
     """
     Decorator for registering model methods as lxml extensions to be passed
@@ -63,7 +64,6 @@ def lxml_extension(method=None, ns_uri=None, name=None):
         '''
     """
 
-
     # If called without a method, we've been called with optional arguments.
     # We return a decorator with the optional arguments filled in.
     # Next time round we'll be decorating method.
@@ -73,7 +73,7 @@ def lxml_extension(method=None, ns_uri=None, name=None):
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
         return method(self, *args, **kwargs)
-        
+
     if name is None:
         if isinstance(method, types.MethodType):
             name = method.__func__.__name__

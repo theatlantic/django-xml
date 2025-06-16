@@ -6,11 +6,13 @@ import copy
 
 from lxml import etree
 
-from django.core.exceptions import (ObjectDoesNotExist, FieldError,
-                                    MultipleObjectsReturned,)
+from django.core.exceptions import (
+    ObjectDoesNotExist,
+    FieldError,
+    MultipleObjectsReturned,
+)
 from django.db.models.base import subclass_exception
-from django.utils.encoding import force_text
-from django.utils.encoding import smart_bytes, smart_str
+from django.utils.encoding import smart_str
 
 from .signals import xmlclass_prepared
 from .options import Options, DEFAULT_NAMES
@@ -23,66 +25,67 @@ class XmlModelBase(type):
     """
 
     def __new__(cls, name, bases, attrs):
-        super_new = super(XmlModelBase, cls).__new__
         parents = [b for b in bases if isinstance(b, XmlModelBase)]
         if not parents:
             # If this isn't a subclass of Model, don't do anything special.
-            return super_new(cls, name, bases, attrs)
+            return super().__new__(cls, name, bases, attrs)
 
         # Create the class.
-        module = attrs.pop('__module__')
-        new_attrs = {'__module__': module}
-        classcell = attrs.pop('__classcell__', None)
+        module = attrs.pop("__module__")
+        new_attrs = {"__module__": module}
+        classcell = attrs.pop("__classcell__", None)
         if classcell is not None:
-            new_attrs['__classcell__'] = classcell
-        new_class = super_new(cls, name, bases, new_attrs)
+            new_attrs["__classcell__"] = classcell
+        new_class = super().__new__(cls, name, bases, new_attrs)
 
-        attr_meta = attrs.pop('Meta', None)
+        attr_meta = attrs.pop("Meta", None)
         if not attr_meta:
-            meta = getattr(new_class, 'Meta', None)
+            meta = getattr(new_class, "Meta", None)
         else:
             meta = attr_meta
 
-        if getattr(meta, 'app_label', None) is None:
+        if getattr(meta, "app_label", None) is None:
             # Figure out the app_label by looking one level up.
             # For 'django.contrib.sites.models', this would be 'sites'.
             model_module = sys.modules[new_class.__module__]
-            kwargs = {"app_label": model_module.__name__.split('.')[-2]}
+            kwargs = {"app_label": model_module.__name__.split(".")[-2]}
         else:
             kwargs = {}
 
         for attr_name in DEFAULT_NAMES:
-            if attr_name == 'app_label':
+            if attr_name == "app_label":
                 continue
             if getattr(meta, attr_name, None) is None:
                 for base in parents:
-                    if not hasattr(base, '_meta'):
+                    if not hasattr(base, "_meta"):
                         continue
                     attr_val = getattr(base._meta, attr_name)
                     if attr_val is not None:
                         kwargs[attr_name] = attr_val
                         break
 
-        new_class.add_to_class('_meta', Options(meta, **kwargs))
+        new_class.add_to_class("_meta", Options(meta, **kwargs))
 
         new_class.add_to_class(
-            'DoesNotExist',
+            "DoesNotExist",
             subclass_exception(
-                'DoesNotExist',
-                tuple(
-                    x.DoesNotExist for x in parents if hasattr(x, '_meta')
-                ) or (ObjectDoesNotExist,),
+                "DoesNotExist",
+                tuple(x.DoesNotExist for x in parents if hasattr(x, "_meta"))
+                or (ObjectDoesNotExist,),
                 module,
-                attached_to=new_class))
+                attached_to=new_class,
+            ),
+        )
         new_class.add_to_class(
-            'MultipleObjectsReturned',
+            "MultipleObjectsReturned",
             subclass_exception(
-                'MultipleObjectsReturned',
-                tuple(
-                    x.MultipleObjectsReturned for x in parents if hasattr(x, '_meta')
-                ) or (MultipleObjectsReturned,),
+                "MultipleObjectsReturned",
+                tuple(x.MultipleObjectsReturned for x in parents if hasattr(x, "_meta"))
+                or (MultipleObjectsReturned,),
                 module,
-                attached_to=new_class))
+                attached_to=new_class,
+            ),
+        )
 
         # Bail out early if we have already created this class.
         m = get_xml_model(new_class._meta.app_label, name, False)
@@ -96,17 +99,18 @@ class XmlModelBase(type):
         field_names = set([f.name for f in new_class._meta.local_fields])
 
         for base in parents:
-            if not hasattr(base, '_meta'):
+            if not hasattr(base, "_meta"):
                 # Things without _meta aren't functional models, so they're
                 # uninteresting parents
                 continue
 
             for field in base._meta.local_fields:
                 if field.name in field_names:
-                    raise FieldError('Local field %r in class %r clashes '
-                                     'with field of similar name from '
-                                     'base class %r' %
-                                        (field.name, name, base.__name__))
+                    raise FieldError(
+                        "Local field %r in class %r clashes "
+                        "with field of similar name from "
+                        "base class %r" % (field.name, name, base.__name__)
+                    )
                 new_class.add_to_class(field.name, copy.deepcopy(field))
 
             new_class._meta.parents.update(base._meta.parents)
@@ -121,11 +125,11 @@ class XmlModelBase(type):
         return get_xml_model(new_class._meta.app_label, name, False)
 
     def add_to_class(cls, name, value):
-        if hasattr(value, 'contribute_to_class'):
+        if hasattr(value, "contribute_to_class"):
             value.contribute_to_class(cls, name)
         else:
             setattr(cls, name, value)
-            if getattr(value, 'is_lxml_extension', False):
+            if getattr(value, "is_lxml_extension", False):
                 cls._meta.add_extension(value, extension_name=name)
 
     def _prepare(cls):
@@ -143,18 +147,17 @@ class XmlModelBase(type):
 
 
 class XmlModel(metaclass=XmlModelBase):
-
     def __init__(self, root_element_tree):
         fields_iter = iter(self._meta.fields)
 
         for field in fields_iter:
-            if getattr(field, 'is_root_field', False):
+            if getattr(field, "is_root_field", False):
                 val = root_element_tree
             else:
                 val = None
             setattr(self, field.attname, val)
 
-        super(XmlModel, self).__init__()
+        super().__init__()
 
     def _get_etree_val(self, meta=None):
         if not meta:
@@ -177,14 +180,16 @@ class XmlModel(metaclass=XmlModelBase):
         opts = self._meta
 
         xpath_kwargs = {
-            'namespaces': getattr(opts, 'namespaces', {}),
-            'extensions': {k: functools.partial(method, self)
-                                for k, method in opts.extensions.items()}}
+            "namespaces": getattr(opts, "namespaces", {}),
+            "extensions": {
+                k: functools.partial(method, self) for k, method in opts.extensions.items()
+            },
+        }
 
         if ns is not None:
-            xpath_kwargs['namespaces'].update(ns)
+            xpath_kwargs["namespaces"].update(ns)
         if ext is not None:
-            xpath_kwargs['extensions'].update(ext)
+            xpath_kwargs["extensions"].update(ext)
         return xpath_kwargs
 
     def _get_xpath_eval(self, namespaces=None, extensions=None):
@@ -215,14 +220,15 @@ class XmlModel(metaclass=XmlModelBase):
             parser = opts.get_parser()
         # lxml doesn't like it when the <?xml ?> header has an encoding,
         # so we strip out encoding="utf-8" with a regex
-        xml_source = re.sub(r'(<\?xml[^\?]*?) encoding="(?:utf-8|UTF-8)"([^\?]*?\?>)',
-                            r'\1\2', xml_source)
+        xml_source = re.sub(
+            r'(<\?xml[^\?]*?) encoding="(?:utf-8|UTF-8)"([^\?]*?\?>)', r"\1\2", xml_source
+        )
         tree = etree.XML(xml_source, parser)
         return cls(tree)
 
     @classmethod
     def create_from_file(cls, xml_file):
-        with codecs.open(xml_file, encoding='utf-8', mode='r') as f:
+        with codecs.open(xml_file, encoding="utf-8", mode="r") as f:
             xml_source = f.read()
         return cls.create_from_string(xml_source)
 
@@ -230,15 +236,16 @@ class XmlModel(metaclass=XmlModelBase):
         try:
             u = str(self)
         except (UnicodeEncodeError, UnicodeDecodeError):
-            u = '[Bad Unicode data]'
-        return smart_str(u'<%s: %s>' % (self.__class__.__name__, u))
+            u = "[Bad Unicode data]"
+        return smart_str("<%s: %s>" % (self.__class__.__name__, u))
 
     def __str__(self):
-        return '%s object' % self.__class__.__name__
+        return "%s object" % self.__class__.__name__
 
     def __eq__(self, other):
-        return isinstance(other, self.__class__) \
-            and self._get_etree_val() == other._get_etree_val()
+        return (
+            isinstance(other, self.__class__) and self._get_etree_val() == other._get_etree_val()
+        )
 
     def __ne__(self, other):
         return not self.__eq__(other)
