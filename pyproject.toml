@@ -34,8 +34,9 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
-dynamic = ["readme", "version"]
+dynamic = ["version"]
 dependencies = ["Django>=2.2", "python-dateutil", "lxml"]
+readme = "README.md"
 
 [tool.setuptools]
 zip-safe = false
