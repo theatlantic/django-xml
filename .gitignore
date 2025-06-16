@@ -13,3 +13,4 @@ pip-log.txt
 .tox
 /venv
 .python-version
+.coverage

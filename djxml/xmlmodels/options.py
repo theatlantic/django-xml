@@ -9,14 +9,27 @@ from django.utils.encoding import smart_bytes, smart_str
 from .exceptions import ExtensionNamespaceException
 from .fields import XmlPrimaryElementField
 
-DEFAULT_NAMES = ('app_label', 'namespaces', 'parser_opts', 'extension_ns_uri',
-                 'xsd_schema', 'xsd_schema_file',)
+DEFAULT_NAMES = (
+    "app_label",
+    "namespaces",
+    "parser_opts",
+    "extension_ns_uri",
+    "xsd_schema",
+    "xsd_schema_file",
+)
 
 
 class Options(object):
-
-    def __init__(self, meta, app_label=None, namespaces=None, parser_opts=None,
-                 extension_ns_uri=None, xsd_schema=None, xsd_schema_file=None):
+    def __init__(
+        self,
+        meta,
+        app_label=None,
+        namespaces=None,
+        parser_opts=None,
+        extension_ns_uri=None,
+        xsd_schema=None,
+        xsd_schema_file=None,
+    ):
         self.local_fields = []
         self.module_name = None
         self.object_name, self.app_label = None, app_label
@@ -58,7 +71,7 @@ class Options(object):
                 # Ignore any private attributes that Django doesn't care about
                 # NOTE: We can't modify a dictionary's contents while looping
                 # over it, so we loop over the *original* dictionary instead.
-                if name.startswith('_'):
+                if name.startswith("_"):
                     del meta_attrs[name]
             for attr_name in DEFAULT_NAMES:
                 if attr_name in meta_attrs:
@@ -68,23 +81,28 @@ class Options(object):
 
             # Any leftover attributes must be invalid.
             if meta_attrs != {}:
-                raise TypeError("'class Meta' got invalid attribute(s): %s" \
-                    % ','.join(list(meta_attrs.keys())))
+                raise TypeError(
+                    "'class Meta' got invalid attribute(s): %s" % ",".join(list(meta_attrs.keys()))
+                )
                 if self.xsd_schema is not None and self.xsd_schema_file is not None:
-                    raise TypeError("'class Meta' got attribute 'xsd_schema' "
-                                     "and 'xsd_schema_file'; only one may be "
-                                     "specified.")
+                    raise TypeError(
+                        "'class Meta' got attribute 'xsd_schema' "
+                        "and 'xsd_schema_file'; only one may be "
+                        "specified."
+                    )
                 if self.schema and not isinstance(self.schema, etree.XMLSchema):
-                    raise TypeError("'class Meta' got attribute 'xsd_schema' "
-                                   "of type %r, expected lxml.etree.XMLSchema" \
-                                    % self.xsd_schema.__class.__name)
+                    raise TypeError(
+                        "'class Meta' got attribute 'xsd_schema' "
+                        "of type %r, expected lxml.etree.XMLSchema"
+                        % self.xsd_schema.__class.__name
+                    )
 
         del self.meta
 
     def _prepare(self, model):
         if not self.has_root_field:
             root_field = XmlPrimaryElementField()
-            model.add_to_class('root', root_field)
+            model.add_to_class("root", root_field)
         if self.xsd_schema_file is not None:
             schema_root = etree.parse(self.xsd_schema_file)
             self.xsd_schema = etree.XMLSchema(schema_root)
@@ -99,11 +117,11 @@ class Options(object):
         # the "creation_counter" attribute of the field.
         self.local_fields.insert(bisect(self.local_fields, field), field)
         self.setup_root(field)
-        if hasattr(self, '_field_cache'):
+        if hasattr(self, "_field_cache"):
             del self._field_cache
             del self._field_name_cache
 
-        if hasattr(self, '_name_map'):
+        if hasattr(self, "_name_map"):
             del self._name_map
 
     def add_extension(self, method, extension_name=None):
@@ -115,19 +133,25 @@ class Options(object):
             if self.extension_ns_uri is not None:
                 ns_uri = self.extension_ns_uri
             else:
-                msg = ("Extension %r has no extension_ns_uri defined and %r "
-                       "does not define a default extension namespace uri") \
-                    % (extension_name, self.app_label)
+                msg = (
+                    "Extension %r has no extension_ns_uri defined and %r "
+                    "does not define a default extension namespace uri"
+                ) % (extension_name, self.app_label)
                 raise ExtensionNamespaceException(msg)
-        
-        self.extensions[(ns_uri, extension_name,)] = method
+
+        self.extensions[
+            (
+                ns_uri,
+                extension_name,
+            )
+        ] = method
 
     def setup_root(self, field):
         if not self.root and field.is_root_field:
             self.etree = field
 
     def __repr__(self):
-        return '<Options for %s>' % self.object_name
+        return "<Options for %s>" % self.object_name
 
     def __str__(self):
         return "%s.%s" % (smart_str(self.app_label), smart_str(self.module_name))
@@ -145,6 +169,7 @@ class Options(object):
         except AttributeError:
             self._fill_fields_cache()
         return self._field_name_cache
+
     fields = property(_fields)
 
     def _fill_fields_cache(self):
@@ -162,5 +187,4 @@ class Options(object):
         for f in self.fields:
             if f.name == name:
                 return f
-        raise FieldDoesNotExist('%s has no field named %r' \
-            % (self.object_name, name))
+        raise FieldDoesNotExist("%s has no field named %r" % (self.object_name, name))

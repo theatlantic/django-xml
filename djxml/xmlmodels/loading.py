@@ -16,34 +16,40 @@ import sys
 import os
 import threading
 
-__all__ = ('get_apps', 'get_app', 'get_xml_models', 'get_xml_model',
-        'register_xml_models', 'load_app', 'app_cache_ready')
+__all__ = (
+    "get_apps",
+    "get_app",
+    "get_xml_models",
+    "get_xml_model",
+    "register_xml_models",
+    "load_app",
+    "app_cache_ready",
+)
+
 
 class AppCache(object):
     """
     A cache that stores installed applications and their xml_models. Used to
     provide reverse-relations and for app introspection (e.g. admin).
     """
+
     # Use the Borg pattern to share state between all instances. Details at
     # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/66531.
     __shared_state = dict(
         # Keys of app_store are the xml_model modules for each application.
-        app_store = OrderedDict(),
-
+        app_store=OrderedDict(),
         # Mapping of app_labels to a dictionary of xml_model names to model
         # code.
-        app_xml_models = OrderedDict(),
-
+        app_xml_models=OrderedDict(),
         # Mapping of app_labels to errors raised when trying to import the app
-        app_errors = {},
-
+        app_errors={},
         # -- Everything below here is only used when populating the cache --
-        loaded = False,
-        handled = {},
-        postponed = [],
-        nesting_level = 0,
-        write_lock = threading.RLock(),
-        _get_xml_models_cache = {},
+        loaded=False,
+        handled={},
+        postponed=[],
+        nesting_level=0,
+        write_lock=threading.RLock(),
+        _get_xml_models_cache={},
     )
 
     def __init__(self):
@@ -81,12 +87,12 @@ class AppCache(object):
         self.nesting_level += 1
         app_module = import_module(app_name)
         try:
-            xml_models = import_module('.xml_models', app_name)
+            xml_models = import_module(".xml_models", app_name)
         except ImportError:
             self.nesting_level -= 1
             # If the app doesn't have an xml_models module, we can just ignore
             # the ImportError and return no xml_models for it.
-            if not module_has_submodule(app_module, 'xml_models'):
+            if not module_has_submodule(app_module, "xml_models"):
                 return None
             # But if the app does have an xml_models module, we need to figure
             # out whether to suppress or propagate the error. If can_postpone
@@ -136,15 +142,14 @@ class AppCache(object):
         self.write_lock.acquire()
         try:
             for app_name in settings.INSTALLED_APPS:
-                if app_label == app_name.split('.')[-1]:
+                if app_label == app_name.split(".")[-1]:
                     mod = self.load_app(app_name, False)
                     if mod is None:
                         if emptyOK:
                             return None
                     else:
                         return mod
-            raise ImproperlyConfigured("App with label %s could not be found"\
-                % app_label)
+            raise ImproperlyConfigured("App with label %s could not be found" % app_label)
         finally:
             self.write_lock.release()
 
@@ -169,14 +174,13 @@ class AppCache(object):
             pass
         self._populate()
         if app_mod:
-            app_list = [self.app_xml_models.get(app_mod.__name__.split('.')[-2], OrderedDict())]
+            app_list = [self.app_xml_models.get(app_mod.__name__.split(".")[-2], OrderedDict())]
         else:
             app_list = self.app_xml_models.values()
         xml_model_list = []
         for app in app_list:
             xml_model_list.extend(
-                model for model in app.values()
-                if ((not model._deferred or include_deferred))
+                model for model in app.values() if (not model._deferred or include_deferred)
             )
         self._get_xml_models_cache[cache_key] = xml_model_list
         return xml_model_list
@@ -190,8 +194,7 @@ class AppCache(object):
         """
         if seed_cache:
             self._populate()
-        return self.app_xml_models.get(app_label, OrderedDict()).get(
-            model_name.lower())
+        return self.app_xml_models.get(app_label, OrderedDict()).get(model_name.lower())
 
     def register_xml_models(self, app_label, *xml_models):
         """
@@ -215,6 +218,7 @@ class AppCache(object):
                     continue
             model_dict[model_name] = model
         self._get_xml_models_cache.clear()
+
 
 cache = AppCache()
 
