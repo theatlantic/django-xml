@@ -6,7 +6,7 @@ requires = ["setuptools>=75.3.2"]
 [project]
 name = "django-xml"
 description = "Provides an abstraction to lxml's XPath and XSLT functionality in a manner resembling django database models"
-license = "BSD-2-Clause"
+license = { text = "BSD-2-Clause" }
 authors = [{ name = "The Atlantic", email = "programmers@theatlantic.com" }]
 requires-python = ">=3.7"
 classifiers = [
