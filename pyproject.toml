@@ -41,8 +41,11 @@ readme = "README.md"
 [tool.setuptools]
 zip-safe = false
 platforms = ["any"]
-packages = ["djxml"]
 include-package-data = false
+
+[tool.setuptools.packages.find]
+include = ["djxml*"]
+namespaces = false
 
 [tool.setuptools.dynamic]
 version = { attr = "djxml.__version__" }
